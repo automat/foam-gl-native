@@ -1,0 +1,12 @@
+{
+  "name": "node-foam-gl",
+  "version": "0.0.1",
+  "main": "index.js",
+  "private": true,
+  "dependencies": {
+    "bindings": "^1.2.1",
+    "nan": "^0.8.0"
+  },
+  "gypfile" : true,
+  "license": "MIT"
+}
