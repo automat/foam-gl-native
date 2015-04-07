@@ -1,6 +1,6 @@
-var FoamGLNative_ = require('bindings')('foam_gl_native');
-var glfw = FoamGLNative_.glfw;
-var gl_  = FoamGLNative_.gl;
+var ContextGLNative_ = require('bindings')('foam_gl_native');
+var glfw = ContextGLNative_.glfw;
+var gl_  = ContextGLNative_.gl;
 
 /*---------------------------------------------------------------------------------------------------------*/
 // DEFINES
@@ -8,14 +8,21 @@ var gl_  = FoamGLNative_.gl;
 
 var DEFAULT_WIDTH  = 800,
     DEFAULT_HEIGHT = 600,
-    DEFAULT_TITLE  = ' ';
+    DEFAULT_TITLE  = ' ',
+    DEFAULT_WINDOW_RESIZABLE = false,
+    DEFAULT_WINDOW_NUM_SAMPLES = 2;
 
 /*---------------------------------------------------------------------------------------------------------*/
-// CONTEXT
+// CONTEXT SETUP & WINDOW
 /*---------------------------------------------------------------------------------------------------------*/
 
 var contextRef = null;
 var windowPtr  = null;
+
+/**
+ * ContextGLNative – GLFW & OpenGL bindings wrapper
+ * @constructor
+ */
 
 function ContextGLNative(){
     this.__secondsElapsed = -1;
@@ -25,60 +32,142 @@ ContextGLNative.testSetup = function(){
     glfw.testSetup();
 };
 
-ContextGLNative.prototype.initWindow = function(width,height,title){
+/**
+ * Creates a new GLFW Window and sets up the OpenGL context.
+ * @param {Number} [width]
+ * @param {Number} [height]
+ * @param {String} [title]
+ * @param {Boolean} [resizable]
+ * @param {Number} [numSamples]
+ */
+
+ContextGLNative.prototype.initWindow = function(width,height,title,resizable,numSamples){
     if (windowPtr !== null) {
         throw new Error('ContextGLNative already initialized.');
     }
-    width = width === undefined ? DEFAULT_WIDTH : width;
-    height = height === undefined ? DEFAULT_HEIGHT : height;
-    title = title === undefined ? DEFAULT_TITLE : title;
+    width      = width === undefined ? DEFAULT_WIDTH : width;
+    height     = height === undefined ? DEFAULT_HEIGHT : height;
+    title      = title === undefined ? DEFAULT_TITLE : title;
+    resizable  = resizable === undefined ? DEFAULT_WINDOW_RESIZABLE : resizable;
+    numSamples = numSamples === undefined ? DEFAULT_WINDOW_NUM_SAMPLES : numSamples;
 
-    windowPtr = glfw.init(width, height, title);
+    windowPtr = glfw.init(width, height, title, resizable, numSamples);
 };
 
-ContextGLNative.prototype.getSecondsElpased = function () {
+/**
+ * Returns the seconds elapsed since context start.
+ * @returns {Number}
+ */
+
+ContextGLNative.prototype.getSecondsElapsed= function () {
     return this.__secondsElapsed;
 };
+
+/**
+ * Returns the screen size the window is positioned in.
+ * @returns {Array}
+ */
+
 ContextGLNative.prototype.getScreenSize = function(){
     return glfw.getScreenSize();
 };
+
+/**
+ * Returns the current cursor position within the window.
+ * @returns {Array}
+ */
 
 ContextGLNative.prototype.getCursorPos = function(){
     return glfw.getCursorPos();
 };
 
+/**
+ * Sets the current cursor position within the window.
+ * @param {Number} x
+ * @param {Number} y
+ */
+
 ContextGLNative.prototype.setCursorPos = function(x,y) {
     glfw.setCursorPos(x,y);
 };
+
+/**
+ * Sets the created windows dimensions.
+ * @param {Number} width
+ * @param {Number} height
+ */
 
 ContextGLNative.prototype.setWindowSize = function(width,height){
     glfw.setWindowSize(width,height);
 };
 
+/**
+ * Returns the windows dimensions.
+ * @returns {Array}
+ */
+
 ContextGLNative.prototype.getWindowSize = function(){
     return glfw.getWindowSize();
 };
+
+/**
+ * Sets the windows position on screen.
+ * @param {Number} x
+ * @param {Number} y
+ */
 
 ContextGLNative.prototype.setWindowPos = function(x,y){
     x = x || 0; y = y || 0;
     glfw.setWindowPos(x,y);
 };
 
+/**
+ * Returns the windows current position on screen.
+ * @returns {Array}
+ */
+
 ContextGLNative.prototype.getWindowPos = function(){
     return glfw.getWindowPos();
 };
+
+/**
+ * Minimizes the window.
+ */
+
+ContextGLNative.prototype.iconifyWindow = function(){
+    glfw.iconifyWindow();
+};
+
+/**
+ * Restores the window if minimized.
+ */
+
+ContextGLNative.prototype.restoreWindow = function() {
+    glfw.restoreWindow();
+};
+
+/**
+ * Returns a reference to the ContextGLNative instance.
+ * @returns {ContextGLNative}
+ */
 
 ContextGLNative.prototype.get = function () {
     return contextRef;
 };
 
-ContextGLNative.prototype.setup = function () {
-    throw new Error('Context setup not implemented.');
+/**
+ * Returns the major, minor, rev information about the created OpenGL context.
+ * @returns {Array}
+ */
+
+ContextGLNative.prototype.getVersion = function(){
+    return glfw.getVersion();
 };
 
-ContextGLNative.prototype.update = function () {
-    throw new Error('Context update not implemented');
-};
+/**
+ * Initializes ContextNativeGL
+ * @param {Object} obj - The App object, must implement setup & draw
+ */
 
 ContextGLNative.new = function(obj){
     function Context(){
@@ -107,11 +196,24 @@ ContextGLNative.new = function(obj){
     glfw.terminate();
 };
 
-var gl = ContextGLNative.gl = {};
+/*---------------------------------------------------------------------------------------------------------*/
+// CONTEXT SETUP & WINDOW
+/*---------------------------------------------------------------------------------------------------------*/
+
+ContextGLNative.prototype.setup = function () {
+    throw new Error('ContextGLNative setup not implemented.');
+};
+
+ContextGLNative.prototype.update = function () {
+    throw new Error('ContextGLNative update not implemented');
+};
 
 /*--------------------------------------------------------------------------------------------*/
-// EXPORT FOR IDE INSPECTION
+// GL BINDINGS
 /*--------------------------------------------------------------------------------------------*/
+
+var gl = ContextGLNative.gl = {};
+
 
 gl.FLOAT =
 gl.VERTEX_PROGRAM_POINT_SIZE = null;
