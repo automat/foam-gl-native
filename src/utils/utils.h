@@ -3,6 +3,7 @@
 
 #include <nan.h>
 #include <node.h>
+#include <sstream>
 
 #define V8_STR(...) NanSymbol(__VA_ARGS__)
 #define V8_INT(val) v8::Integer::New(val)
