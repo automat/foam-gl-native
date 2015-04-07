@@ -1,6 +1,6 @@
-var FoamGLFW_ = require('bindings')('foam_gl_native');
-
-console.log(FoamGLFW_);
+var FoamGLNative_ = require('bindings')('foam_gl_native');
+var glfw = FoamGLNative_.glfw;
+var gl_  = FoamGLNative_.gl;
 
 /*---------------------------------------------------------------------------------------------------------*/
 // DEFINES
@@ -11,158 +11,246 @@ var DEFAULT_WIDTH  = 800,
     DEFAULT_TITLE  = ' ';
 
 /*---------------------------------------------------------------------------------------------------------*/
-// VARIABLES
-/*---------------------------------------------------------------------------------------------------------*/
-var windowPtr;
-
-/*---------------------------------------------------------------------------------------------------------*/
 // CONTEXT
 /*---------------------------------------------------------------------------------------------------------*/
 
-var appInstance = null;
+var contextRef = null;
+var windowPtr  = null;
 
-var FoamGLFW = {};
-
-
-
-function App(){
+function ContextGLNative(){
     this.__secondsElapsed = -1;
-
 }
 
-App.prototype.setWindow = function(width,height,title){
-    if(windowPtr !== undefined){
-        throw new Error('FoamGLFW already initialized.');
-    }
-    width  = width  === undefined ? DEFAULT_WIDTH : width;
-    height = height === undefined ? DEFAULT_HEIGHT : height;
-    title  = title  === undefined ? DEFAULT_TITLE : title;
-    windowPtr = FoamGLFW_.init(width,height,title);
+ContextGLNative.testSetup = function(){
+    glfw.testSetup();
 };
 
-App.prototype.getSecondsElpased = function () {
+ContextGLNative.prototype.initWindow = function(width,height,title){
+    if (windowPtr !== null) {
+        throw new Error('ContextGLNative already initialized.');
+    }
+    width = width === undefined ? DEFAULT_WIDTH : width;
+    height = height === undefined ? DEFAULT_HEIGHT : height;
+    title = title === undefined ? DEFAULT_TITLE : title;
+
+    windowPtr = glfw.init(width, height, title);
+};
+
+ContextGLNative.prototype.getSecondsElpased = function () {
     return this.__secondsElapsed;
 };
-App.prototype.getScreenSize = function(){
-    return FoamGLFW_.getScreenSize();
+ContextGLNative.prototype.getScreenSize = function(){
+    return glfw.getScreenSize();
 };
 
-App.prototype.getCursorPos = function(){
-    return FoamGLFW_.getCursorPos();
+ContextGLNative.prototype.getCursorPos = function(){
+    return glfw.getCursorPos();
 };
 
-App.prototype.setCursorPos = function(x,y) {
-    FoamGLFW_.setCursorPos(x,y);
+ContextGLNative.prototype.setCursorPos = function(x,y) {
+    glfw.setCursorPos(x,y);
 };
 
-App.prototype.setWindowSize = function(width,height){
-    FoamGLFW_.setWindowSize(width,height);
+ContextGLNative.prototype.setWindowSize = function(width,height){
+    glfw.setWindowSize(width,height);
 };
 
-App.prototype.getWindowSize = function(){
-    return FoamGLFW_.getWindowSize();
+ContextGLNative.prototype.getWindowSize = function(){
+    return glfw.getWindowSize();
 };
 
-App.prototype.setWindowPos = function(x,y){
+ContextGLNative.prototype.setWindowPos = function(x,y){
     x = x || 0; y = y || 0;
-    FoamGLFW_.setWindowPos(x,y);
+    glfw.setWindowPos(x,y);
 };
 
-App.prototype.getWindowPos = function(){
-    return FoamGLFW_.getWindowPos();
+ContextGLNative.prototype.getWindowPos = function(){
+    return glfw.getWindowPos();
 };
 
-App.prototype.get = function () {
-    return appInstance;
+ContextGLNative.prototype.get = function () {
+    return contextRef;
 };
 
-App.prototype.setup = function () {
-    throw new Error('App setup not implemented.');
+ContextGLNative.prototype.setup = function () {
+    throw new Error('Context setup not implemented.');
 };
-App.prototype.update = function () {
-    throw new Error('App update not implemented');
+
+ContextGLNative.prototype.update = function () {
+    throw new Error('Context update not implemented');
 };
-App.prototype.updateFixed = function(){};
 
-
-
-/*---------------------------------------------------------------------------------------------------------*/
-// EXPORT
-/*---------------------------------------------------------------------------------------------------------*/
-
-FoamGLFW.newWithResources = function(obj){
-    function App_(){
-        App.call(this);
+ContextGLNative.new = function(obj){
+    function Context(){
+        ContextGLNative.call(this);
     }
-    App_.prototype = Object.create(App.prototype);
+    Context.prototype = Object.create(ContextGLNative.prototype);
 
     for(var p in obj){
         if(obj.hasOwnProperty(p)){
-            App_.prototype[p] = obj[p];
+            Context.prototype[p] = obj[p];
         }
     }
-    appInstance = new App_();
-    appInstance.__secondsElapsed = 0;
+    contextRef = new Context();
+    contextRef.__secondsElapsed = 0;
 
-    appInstance.setup();
+    contextRef.setup();
 
-    while(!FoamGLFW_.windowShouldClose()){
-        appInstance.__secondsElapsed = FoamGLFW_.getTime();
-        appInstance.update();
+    while(!glfw.windowShouldClose()){
+        contextRef.__secondsElapsed = glfw.getTime();
+        contextRef.update();
 
-        FoamGLFW_.pollEvents();
-        FoamGLFW_.swapBuffers();
+        glfw.pollEvents();
+        glfw.swapBuffers();
     }
 
-    FoamGLFW_.terminate();
+    glfw.terminate();
 };
 
-// FOR IDE INSPECTION
-var gl = {};
+var gl = ContextGLNative.gl = {};
 
-gl.clearColor = FoamGLFW_.clearColor;
-gl.clear      = FoamGLFW_.clear;
+/*--------------------------------------------------------------------------------------------*/
+// EXPORT FOR IDE INSPECTION
+/*--------------------------------------------------------------------------------------------*/
 
-gl.attachShader = FoamGLFW_.attachShader;
-gl.bindAttribLocation = FoamGLFW_.bindAttribLocation;
-gl.compileShader = FoamGLFW_.compileShader;
-gl.createProgram = FoamGLFW_.createProgram;
-gl.createShader  = FoamGLFW_.createShader;
-gl.deleteProgram = FoamGLFW_.deleteProgram;
-gl.deleteShader  = FoamGLFW_.deleteShader;
-gl.detachShader  = FoamGLFW_.detachShader;
-//gl.getAttachedShaders = FoamGLFW_.getAttachedShaders;
-gl.getProgramParameter = FoamGLFW_.getProgramParameter;
-gl.getProgramInfoLog   = FoamGLFW_.getProgramInfoLog;
-gl.getShaderParameter  = FoamGLFW_.getShaderParameter;
-gl.getShaderInfoLog    = FoamGLFW_.getShaderInfoLog;
-gl.getShaderSource     = FoamGLFW_.getShaderSource;
+gl.FLOAT =
+gl.VERTEX_PROGRAM_POINT_SIZE = null;
 
-gl.isProgram      = FoamGLFW_.isProgram;
-gl.isShader       = FoamGLFW_.isShader;
-gl.linkProgram    = FoamGLFW_.linkProgram;
-gl.shaderSource   = FoamGLFW_.shaderSource;
-gl.useProgram     = FoamGLFW_.useProgram;
-gl.validateShader = FoamGLFW_.validateShader;
+//PER FRAGMENT OPERATIONS
 
-gl.createBuffer  = FoamGLFW_.createBuffer;
-gl.bindBuffer    = FoamGLFW_.bindBuffer;
-gl.bufferData    = FoamGLFW_.bufferData;
-gl.bufferSubData = FoamGLFW_.bufferSubData;
-gl.deleteBuffer  = FoamGLFW_.deleteBuffer;
-//gl.getBufferParameter = FoamGLFW_.getBufferParameter;
-gl.isBuffer      = FoamGLFW_.isBuffer;
+gl.NEVER =
+gl.ALWAYS =
+gl.LESS =
+gl.EQUAL =
+gl.LEQUAL =
+gl.GREATER =
+gl.GEQUAL =
+gl.NOTEQUAL = null;
 
-gl.VERTEX_SHADER = FoamGLFW_.VERTEX_SHADER;
-gl.FRAGMENT_SHADER = FoamGLFW_.FRAGMENT_SHADER;
-gl.COMPILE_STATUS = FoamGLFW_.COMPILE_STATUS;
+gl.depthFunc = null;
 
-gl.ARRAY_BUFFER = FoamGLFW_.ARRAY_BUFFER;
-gl.ELEMENT_ARRAY_BUFFER = FoamGLFW.ELEMENT_ARRAY_BUFFER;
-gl.STATIC_DRAW  = FoamGLFW_.STATIC_DRAW;
-gl.DYNAMIC_DRAW = FoamGLFW_.DYNAMIC_DRAW;
+//SPECIAL FUNCTIONS
+
+gl.ARRAY_BUFFER_BINDING =
+gl.CURRENT_PROGRAM = null;
+
+gl.disable =
+gl.enable =
+gl.finish =
+gl.flush =
+gl.getParameter =
+gl.hint =
+gl.isEnabled =
+gl.pixelStorei = null;
+
+//FRAMEBUFFER
+
+gl.COLOR_BUFFER_BIT =
+gl.DEPTH_BUFFER_BIT =
+gl.clearColor =
+gl.clear =
+gl.clearDepth =
+gl.clearColor =
+gl.clearStencil =
+gl.colorMask =
+gl.depthMask =
+gl.stencilMask =
+gl.stencilMaskSeparate = null;
+
+gl.DEPTH_TEST = null;
+
+//PROGRAMS AND SHADERS
+
+gl.viewport =
+gl.depthRange =
+gl.scissor = null;
+
+gl.VERTEX_SHADER =
+gl.FRAGMENT_SHADER =
+gl.COMPILE_STATUS =
+gl.LINK_STATUS = null;
+
+gl.createShader =
+gl.attachShader =
+gl.bindAttribLocation =
+gl.compileShader =
+gl.createProgram =
+gl.deleteProgram =
+gl.deleteShader =
+gl.detachShader = null;
+
+gl.getProgramParameter =
+gl.getProgramInfoLog =
+gl.getShaderParameter=
+gl.getShaderInfoLog =
+gl.getShaderSource =
+gl.isProgram =
+gl.isShader =
+gl.linkProgram =
+gl.shaderSource =
+gl.useProgram =
+gl.validateProgram = null;
+
+//UNIFORMS AND ATTRIBUTES
+
+gl.disableVertexAttribArray =
+gl.enableVertexAttribArray =
+gl.getAttribLocation =
+gl.getUniformLocation =
+gl.uniform1f =
+gl.uniform2f =
+gl.uniform3f =
+gl.uniform4f =
+//gl.uniform1fv =
+//gl.uniform2fv =
+//gl.uniform3fv =
+//gl.uniform4fv =
+gl.uniform1i =
+gl.uniform2i =
+gl.uniform3i =
+gl.uniform4i =
+gl.uniformMatrix2fv =
+gl.uniformMatrix3fv =
+gl.uniformMatrix4fv =
+gl.vertexAttribPointer = null;
+
+//BUFFER
+
+gl.ARRAY_BUFFER =
+gl.ELEMENT_ARRAY_BUFFER =
+gl.STATIC_DRAW =
+gl.DYNAMIC_DRAW =
+gl.BUFFER_SIZE =
+gl.BUFFER_USAGE = null;
+
+gl.createBuffer =
+gl.bindBuffer =
+gl.bufferData =
+gl.bufferSubData =
+gl.deleteBuffer =
+gl.getBufferParameter =
+gl.isBuffer = null;
+
+//DRAW BUFFER WRITING
+gl.POINTS =
+gl.LINE_STRIP =
+gl.LINE_LOOP =
+gl.LINES =
+gl.TRIANGLES =
+gl.TRIANGLE_STRIP =
+gl.TRIANGLE_FAN = null;
+
+gl.drawArrays =
+gl.drawElements =
+gl.drawRangeElements = null;
 
 
+for(var p in gl){
+    gl[p] = gl_[p];
+}
 
-FoamGLFW.gl = gl;
-module.exports = FoamGLFW;
+/*--------------------------------------------------------------------------------------------*/
+// EXPORT
+/*--------------------------------------------------------------------------------------------*/
+
+module.exports = ContextGLNative;

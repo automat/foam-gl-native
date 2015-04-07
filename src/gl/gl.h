@@ -6,7 +6,7 @@
 
 using namespace v8;
 
-namespace ngl{
+namespace gl{
     void init(Handle<Object> exports);
 }
 
