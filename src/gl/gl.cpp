@@ -1,4 +1,5 @@
 #include "gl.h"
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <node.h>
 #include <vector>
@@ -232,6 +233,48 @@ NAN_METHOD(scissor) {
 /*--------------------------------------------------------------------------------------------*/
 // PROGRAM
 /*--------------------------------------------------------------------------------------------*/
+
+//FRAGMENT SHADERS
+
+NAN_METHOD(bindFragDataLocation){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLuint program = args[0]->Uint32Value();
+    GLuint colorNumber = args[1]->Uint32Value();
+    String::Utf8Value name(args[2]);
+    glBindFragDataLocation(program,colorNumber,*name);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(bindFragDataLocationIndexed){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLuint program = args[0]->Uint32Value();
+    GLuint colorNumber = args[1]->Uint32Value();
+    GLuint index = args[2]->Uint32Value();
+    String::Utf8Value name(args[3]);
+    glBindFragDataLocationIndexed(program,colorNumber,index,*name);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(getFragDataLocation){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    String::Utf8Value name(args[1]);
+    GLint location = glGetFragDataLocation(program,*name);
+    NanReturnValue(V8_INT(location));
+}
+
+NAN_METHOD(getFrageDataIndex){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    String::Utf8Value name(args[1]);
+    GLint index = glGetFragDataIndex(program,*name);
+    NanReturnValue(V8_INT(index));
+}
+
 
 NAN_METHOD(attachShader){
     NanScope();
@@ -788,9 +831,38 @@ NAN_METHOD(isBuffer) {
 }
 
 /*--------------------------------------------------------------------------------------------*/
-// VERTEX ARRAYS
+// VERTEX ARRAY OBJECTS
 /*--------------------------------------------------------------------------------------------*/
 
+NAN_METHOD(createVertexArray){
+    NanScope();
+    GLuint vao;
+    glGenVertexArrays(1,&vao);
+    NanReturnValue(V8_INT(vao));
+}
+
+NAN_METHOD(deleteVertexArray){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint vao = args[0]->Uint32Value();
+    glDeleteVertexArrays(1,&vao);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(bindVertexArray){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint vao = args[0]->Uint32Value();
+    glBindVertexArray(vao);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(isVertexArray){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLboolean value = glIsVertexArray(args[0]->Uint32Value());
+    NanReturnValue(V8_BOOL(value));
+}
 
 
 /*--------------------------------------------------------------------------------------------*/
@@ -878,6 +950,7 @@ void gl::init(Handle<Object> exports) {
     /*----------------------------------------------------------------------------------------*/
     // FRAMEBUFFER
     /*----------------------------------------------------------------------------------------*/
+
     EXPORT_SET_GL_CONST(DEPTH_BUFFER_BIT);
     EXPORT_SET_GL_CONST(COLOR_BUFFER_BIT);
 
@@ -908,6 +981,13 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_GL_CONST(FRAGMENT_SHADER);
     EXPORT_SET_GL_CONST(COMPILE_STATUS);
     EXPORT_SET_GL_CONST(LINK_STATUS);
+
+    //FRAGMENT SHADERS
+
+    EXPORT_SET_METHOD(bindFragDataLocation);
+    EXPORT_SET_METHOD(bindFragDataLocationIndexed);
+    EXPORT_SET_METHOD(getFragDataLocation);
+    EXPORT_SET_METHOD(getFrageDataIndex);
 
     EXPORT_SET_METHOD(createShader);
     EXPORT_SET_METHOD(attachShader);
@@ -972,6 +1052,15 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_METHOD(deleteBuffer);
     EXPORT_SET_METHOD(getBufferParameter);
     EXPORT_SET_METHOD(isBuffer);
+
+    /*----------------------------------------------------------------------------------------*/
+    // VERTEX ARRAY OBJECTS
+    /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_METHOD(createVertexArray);
+    EXPORT_SET_METHOD(deleteVertexArray);
+    EXPORT_SET_METHOD(bindVertexArray);
+    EXPORT_SET_METHOD(isVertexArray);
 
     /*----------------------------------------------------------------------------------------*/
     // DRAW BUFFER WRITING
