@@ -170,6 +170,13 @@ gl.FRAGMENT_SHADER =
 gl.COMPILE_STATUS =
 gl.LINK_STATUS = null;
 
+//fragment shaders
+
+gl.bindFragDataLocation =
+gl.bindFragDataLocationIndex =
+gl.getFragDataLocation =
+gl.getFragDataIndex = null;
+
 gl.createShader =
 gl.attachShader =
 gl.bindAttribLocation =
@@ -230,6 +237,14 @@ gl.bufferSubData =
 gl.deleteBuffer =
 gl.getBufferParameter =
 gl.isBuffer = null;
+
+
+//VERTEX ARRAY OBJECTS
+
+gl.createVertexArray =
+gl.deleteVertexArray =
+gl.bindVertexArray =
+gl.isVertexArray = null;
 
 //DRAW BUFFER WRITING
 gl.POINTS =
