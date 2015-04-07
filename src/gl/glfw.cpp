@@ -21,7 +21,7 @@ void errorCallback(int error, const char* description){
     fputs(description, stderr);
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
@@ -62,7 +62,6 @@ NAN_METHOD(terminate){
 
 NAN_METHOD(destroyWindow){
     NanScope();
-    glfwDestroyWindow(reinterpret_cast<GLFWwindow*>(windowPtr));
     NanReturnUndefined();
 }
 
@@ -153,13 +152,34 @@ NAN_METHOD(getWindowPos){
     NanReturnValue(out);
 }
 
+NAN_METHOD(getVersion){
+    NanScope();
+    int major, minor, rev;
+    glfwGetVersion(&major,&minor,&rev);
+    Local<Array> out = Array::New(3);
+    out->Set(0, V8_INT(major));
+    out->Set(1, V8_INT(major));
+    out->Set(2, V8_INT(major));
+    NanReturnValue(out);
+}
+
+NAN_METHOD(iconifyWindow){
+    NanScope();
+    glfwIconifyWindow(reinterpret_cast<GLFWwindow*>(windowPtr));
+    NanReturnUndefined();
+}
+
+NAN_METHOD(restoreWindow){
+    NanScope();
+    glfwRestoreWindow(reinterpret_cast<GLFWwindow*>(windowPtr));
+    NanReturnUndefined();
+}
+
 /*--------------------------------------------------------------------------------------------*/
 // INIT
 /*--------------------------------------------------------------------------------------------*/
 
 NAN_METHOD(init_) {
-    atexit(glfwTerminate);
-
     NanScope();
 
     if(initialized){
@@ -170,20 +190,26 @@ NAN_METHOD(init_) {
         return NanThrowError("Failed to initialize GLFW.");
     }
 
+    CHECK_ARGS_LEN(5);
+
+    int windowWidth = args[0]->Int32Value();
+    int windowHeight = args[1]->Int32Value();
+    const char* windowTitle = *String::Utf8Value(args[2]->ToString());
+    GLboolean windowIsResizable = static_cast<GLboolean>(args[3]->BooleanValue());
+    int numSamples = args[4]->Int32Value();
+
+    atexit(glfwTerminate);
+
     glfwSetErrorCallback(errorCallback);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_RESIZABLE, windowIsResizable);
+    glfwWindowHint(GLFW_SAMPLES, numSamples);
 
-    GLFWwindow *window = glfwCreateWindow(
-            args[0]->Uint32Value(),
-            args[1]->Uint32Value(),
-            *String::Utf8Value(args[2]->ToString()),
-            NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowTitle, NULL, NULL);
 
     if(!window){
         glfwTerminate();
@@ -191,7 +217,7 @@ NAN_METHOD(init_) {
     }
 
     glfwMakeContextCurrent(window);
-    glfwSetKeyCallback(window, key_callback);
+    glfwSetKeyCallback(window, keyCallback);
 
     glewExperimental = GL_TRUE;
     glewInit();
@@ -208,58 +234,6 @@ NAN_METHOD(init_) {
 
 NAN_METHOD(testSetup){
     NanScope();
-    if(initialized){
-        NanThrowError("glfw test setup already initialized.");
-    }
-    atexit(glfwTerminate);
-
-    GLFWwindow* window;
-    glfwSetErrorCallback(errorCallback);
-
-    if (!glfwInit())
-        NanThrowError("Cant initialize glfw.");
-        exit(EXIT_FAILURE);
-
-    window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
-
-    if (!window) {
-        NanThrowError("Cant create glfw window");
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-    glfwSetKeyCallback(window, key_callback);
-
-    while (!glfwWindowShouldClose(window)) {
-        float ratio;
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-        ratio = width / (float) height;
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
-        glBegin(GL_TRIANGLES);
-        glColor3f(1.f, 0.f, 0.f);
-        glVertex3f(-0.6f, -0.4f, 0.f);
-        glColor3f(0.f, 1.f, 0.f);
-        glVertex3f(0.6f, -0.4f, 0.f);
-        glColor3f(0.f, 0.f, 1.f);
-        glVertex3f(0.f, 0.6f, 0.f);
-        glEnd();
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-    }
-
-    glfwDestroyWindow(window);
-    glfwTerminate();
-
     NanReturnUndefined();
 }
 
@@ -270,7 +244,6 @@ NAN_METHOD(testSetup){
 void glfw::init(Handle<Object> exports){
     NODE_SET_METHOD(exports,"init", init_);
     EXPORT_SET_METHOD(terminate);
-    EXPORT_SET_METHOD(destroyWindow);
 
     EXPORT_SET_METHOD(pollEvents);
     EXPORT_SET_METHOD(swapBuffers);
@@ -285,8 +258,12 @@ void glfw::init(Handle<Object> exports){
     EXPORT_SET_METHOD(getWindowSize);
     EXPORT_SET_METHOD(setWindowPos);
     EXPORT_SET_METHOD(getWindowPos);
+    EXPORT_SET_METHOD(iconifyWindow);
+    EXPORT_SET_METHOD(restoreWindow);
 
     EXPORT_SET_METHOD(getTime);
+
+    EXPORT_SET_METHOD(getVersion);
 
     EXPORT_SET_METHOD(testSetup);
 }
