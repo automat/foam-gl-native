@@ -118,43 +118,18 @@ NAN_METHOD(pixelStorei){
 }
 
 /*--------------------------------------------------------------------------------------------*/
-// FRAMEBUFFER
+// WHOLE FRAMEBUFFER
 /*--------------------------------------------------------------------------------------------*/
 
-//#define THROW_ARGS_LEN_ERROR(methodName,expectedSize)
-
-NAN_METHOD(clear){
+NAN_METHOD(drawBuffer){
     NanScope();
     CHECK_ARGS_LEN(1);
-    glClear(args[0]->Uint32Value());
+    GLenum buf = args[0]->Uint32Value();
+    glDrawBuffer(buf);
     NanReturnUndefined();
 }
 
-NAN_METHOD(clearColor){
-    NanScope();
-    CHECK_ARGS_LEN(4);
-    glClearColor(
-            static_cast<GLfloat>(args[0]->NumberValue()),
-            static_cast<GLfloat>(args[1]->NumberValue()),
-            static_cast<GLfloat>(args[2]->NumberValue()),
-            static_cast<GLfloat>(args[3]->NumberValue())
-    );
-    NanReturnUndefined();
-}
-
-NAN_METHOD(clearDepth){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glClearDepth(static_cast<GLfloat>(args[0]->NumberValue()));
-    NanReturnUndefined();
-}
-
-NAN_METHOD(clearStencil){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glClearStencil(args[0]->Int32Value());
-    NanReturnUndefined();
-}
+//drawBuffers
 
 NAN_METHOD(colorMask){
     NanScope();
@@ -191,6 +166,73 @@ NAN_METHOD(stencilMaskSeparate){
     );
     NanReturnUndefined();
 }
+
+NAN_METHOD(clear){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glClear(args[0]->Uint32Value());
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearColor){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    glClearColor(
+            static_cast<GLfloat>(args[0]->NumberValue()),
+            static_cast<GLfloat>(args[1]->NumberValue()),
+            static_cast<GLfloat>(args[2]->NumberValue()),
+            static_cast<GLfloat>(args[3]->NumberValue())
+    );
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearDepth){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glClearDepth(static_cast<GLfloat>(args[0]->NumberValue()));
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearStencil){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glClearStencil(args[0]->Int32Value());
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearAccum){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLfloat r = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat g = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat b = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat a = static_cast<GLfloat>(args[3]->NumberValue());
+    glClearAccum(r,g,b,a);
+    NanReturnUndefined();
+}
+
+//clearBuffer{if ui}v
+
+NAN_METHOD(clearBufferfi){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLenum buf = args[0]->Uint32Value();
+    GLint drawbuffer = args[1]->Int32Value();
+    GLfloat depth = static_cast<GLfloat>(args[2]->NumberValue());
+    GLint stencil = args[3]->Int32Value();
+    glClearBufferfi(buf,drawbuffer,depth,stencil);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(accum){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum op = args[0]->Uint32Value();
+    GLfloat value = static_cast<GLfloat>(args[1]->NumberValue());
+    glAccum(op,value);
+    NanReturnUndefined();
+}
+
 
 /*--------------------------------------------------------------------------------------------*/
 // VIEW & CLIP
@@ -231,83 +273,10 @@ NAN_METHOD(scissor) {
 }
 
 /*--------------------------------------------------------------------------------------------*/
-// PROGRAM
+// SHADERS AND PROGRAMS
 /*--------------------------------------------------------------------------------------------*/
 
-//FRAGMENT SHADERS
-
-NAN_METHOD(bindFragDataLocation){
-    NanScope();
-    CHECK_ARGS_LEN(3);
-    GLuint program = args[0]->Uint32Value();
-    GLuint colorNumber = args[1]->Uint32Value();
-    String::Utf8Value name(args[2]);
-    glBindFragDataLocation(program,colorNumber,*name);
-    NanReturnUndefined();
-}
-
-NAN_METHOD(bindFragDataLocationIndexed){
-    NanScope();
-    CHECK_ARGS_LEN(3);
-    GLuint program = args[0]->Uint32Value();
-    GLuint colorNumber = args[1]->Uint32Value();
-    GLuint index = args[2]->Uint32Value();
-    String::Utf8Value name(args[3]);
-    glBindFragDataLocationIndexed(program,colorNumber,index,*name);
-    NanReturnUndefined();
-}
-
-NAN_METHOD(getFragDataLocation){
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    GLuint program = args[0]->Uint32Value();
-    String::Utf8Value name(args[1]);
-    GLint location = glGetFragDataLocation(program,*name);
-    NanReturnValue(V8_INT(location));
-}
-
-NAN_METHOD(getFrageDataIndex){
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    GLuint program = args[0]->Uint32Value();
-    String::Utf8Value name(args[1]);
-    GLint index = glGetFragDataIndex(program,*name);
-    NanReturnValue(V8_INT(index));
-}
-
-
-NAN_METHOD(attachShader){
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    glAttachShader(
-            args[0]->Uint32Value(),
-            args[1]->Uint32Value());
-    NanReturnUndefined();
-}
-
-NAN_METHOD(bindAttribLocation) {
-    NanScope();
-    CHECK_ARGS_LEN(3);
-    glBindAttribLocation(
-            args[0]->Uint32Value(),
-            args[1]->Uint32Value(),
-            *String::Utf8Value(args[2]));
-    NanReturnUndefined();
-}
-
-NAN_METHOD(compileShader) {
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glCompileShader(args[0]->Uint32Value());
-    NanReturnUndefined();
-}
-
-NAN_METHOD(createProgram) {
-    NanScope();
-    GLuint program = glCreateProgram();
-    programs.push_back(program);
-    NanReturnValue(V8_NUM(program));
-}
+//region SHADER OBJECTS
 
 NAN_METHOD(createShader) {
     NanScope();
@@ -315,121 +284,6 @@ NAN_METHOD(createShader) {
     GLuint shader = glCreateShader(args[0]->Uint32Value());
     shaders.push_back(shader);
     NanReturnValue(V8_NUM(shader));
-}
-
-NAN_METHOD(deleteProgram) {
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    GLuint program = args[0]->Uint32Value();
-    glDeleteProgram(program);
-    removeRef(&programs, program);
-    NanReturnUndefined();
-}
-
-NAN_METHOD(deleteShader) {
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    GLuint shader = args[0]->Uint32Value();
-    glDeleteShader(shader);
-    removeRef(&shaders, shader);
-    NanReturnUndefined();
-}
-
-NAN_METHOD(detachShader) {
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    glDetachShader(args[0]->Uint32Value(), args[1]->Uint32Value());
-    NanReturnUndefined();
-}
-
-//    NAN_METHOD(GetAttachedShaders){}
-
-NAN_METHOD(getProgramParameter) {
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    GLuint program = args[0]->Uint32Value();
-    GLenum pname = args[1]->Uint32Value();
-    GLint params;
-
-    switch (pname) {
-        case GL_COMPILE_STATUS:
-        case GL_LINK_STATUS:
-            glGetProgramiv(program,pname,&params);
-            NanReturnValue(V8_BOOL(static_cast<bool>(params)));
-        default:
-            break;
-    }
-
-    NanReturnUndefined();
-}
-
-NAN_METHOD(getProgramInfoLog) {
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    GLsizei len = 1024;
-    GLchar infoLog[len];
-    glGetProgramInfoLog(args[0]->Uint32Value(), len, &len, infoLog);
-    NanReturnValue(V8_STR(infoLog));
-}
-
-NAN_METHOD(getShaderParameter) {
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    GLuint shader, paramName;
-    GLint value;
-    shader = args[0]->Uint32Value();
-    paramName = args[1]->Uint32Value();
-    value = 0;
-    switch (paramName) {
-        case GL_COMPILE_STATUS:
-        case GL_DELETE_STATUS:
-            glGetShaderiv(shader, paramName, &value);
-            NanReturnValue(V8_BOOL(static_cast<bool>(value)));
-        default:
-            break;
-    }
-
-    NanReturnUndefined();
-}
-
-NAN_METHOD(getShaderInfoLog) {
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    GLsizei len = 1024;
-    GLchar infoLog[len];
-    glGetShaderInfoLog(args[0]->Uint32Value(), len, &len, infoLog);
-    NanReturnValue(V8_STR(infoLog));
-}
-
-NAN_METHOD(getShaderSource) {
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    GLuint shader = args[0]->Uint32Value();
-    GLint len;
-    glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &len);
-    GLchar *src = new GLchar[len];
-    glGetShaderSource(shader, len, NULL, src);
-    Local<String> str = V8_STR(src);
-    delete src;
-    NanReturnValue(str);
-}
-
-NAN_METHOD(isProgram) {
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    NanReturnValue(V8_BOOL(glIsProgram(args[0]->Uint32Value())));
-}
-
-NAN_METHOD(isShader) {
-    NanScope();
-    NanReturnValue(V8_BOOL(glIsShader(args[0]->Uint32Value())));
-}
-
-NAN_METHOD(linkProgram) {
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glLinkProgram(args[0]->Uint32Value());
-    NanReturnUndefined();
 }
 
 NAN_METHOD(shaderSource) {
@@ -443,6 +297,55 @@ NAN_METHOD(shaderSource) {
     NanReturnUndefined();
 }
 
+NAN_METHOD(compileShader) {
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glCompileShader(args[0]->Uint32Value());
+    NanReturnUndefined();
+}
+
+NAN_METHOD(deleteShader) {
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint shader = args[0]->Uint32Value();
+    glDeleteShader(shader);
+    removeRef(&shaders, shader);
+    NanReturnUndefined();
+}
+//endregion
+
+//region PROGRAM OBJECTS
+
+NAN_METHOD(createProgram) {
+    NanScope();
+    GLuint program = glCreateProgram();
+    programs.push_back(program);
+    NanReturnValue(V8_NUM(program));
+}
+
+NAN_METHOD(attachShader){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    GLuint shader = args[1]->Uint32Value();
+    glAttachShader(program,shader);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(detachShader) {
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    glDetachShader(args[0]->Uint32Value(), args[1]->Uint32Value());
+    NanReturnUndefined();
+}
+
+NAN_METHOD(linkProgram) {
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glLinkProgram(args[0]->Uint32Value());
+    NanReturnUndefined();
+}
+
 NAN_METHOD(useProgram) {
     NanScope();
     CHECK_ARGS_LEN(1);
@@ -450,33 +353,63 @@ NAN_METHOD(useProgram) {
     NanReturnUndefined();
 }
 
-NAN_METHOD(validateProgram) {
+NAN_METHOD(deleteProgram) {
     NanScope();
     CHECK_ARGS_LEN(1);
-    glValidateProgram(args[0]->Uint32Value());
+    GLuint program = args[0]->Uint32Value();
+    glDeleteProgram(program);
+    removeRef(&programs, program);
+    NanReturnUndefined();
+}
+//endregion
+
+//region PROGRAM PIPELINE OBJECTS
+
+NAN_METHOD(createProgramPipeline){
+    NanScope();
+    GLuint pipeline;
+    glGenProgramPipelines(1,&pipeline);
+    NanReturnValue(V8_INT(pipeline));
+}
+
+NAN_METHOD(deleteProgramPipeline){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint pipeline = args[0]->Uint32Value();
+    glDeleteProgramPipelines(1,&pipeline);
     NanReturnUndefined();
 }
 
-NAN_METHOD(disableVertexAttribArray){
+NAN_METHOD(bindProgramPipeline){
     NanScope();
     CHECK_ARGS_LEN(1);
-    glDisableVertexAttribArray(args[0]->Uint32Value());
+    GLuint pipeline = args[0]->Uint32Value();
+    glBindProgramPipeline(pipeline);
     NanReturnUndefined();
 }
 
-NAN_METHOD(enableVertexAttribArray){
+NAN_METHOD(useProgramStages){
     NanScope();
-    CHECK_ARGS_LEN(1);
-    glEnableVertexAttribArray(args[0]->Uint32Value());
+    CHECK_ARGS_LEN(3);
+    GLuint pipeline = args[0]->Uint32Value();
+    GLbitfield stages = args[1]->Uint32Value();
+    GLuint  program = args[2]->Uint32Value();
+    glUseProgramStages(pipeline,stages,program);
     NanReturnUndefined();
 }
 
-/*--------------------------------------------------------------------------------------------*/
-// UNIFORMS AND ATTRIBUTES
-/*--------------------------------------------------------------------------------------------*/
+NAN_METHOD(activeShaderProgram){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint pipeline = args[0]->Uint32Value();
+    GLuint program = args[1]->Uint32Value();
+    glActiveShaderProgram(pipeline,program);
+    NanReturnUndefined();
+}
 
-//glActiveAttrib
-//getActiveUniform
+//endregion
+
+//region VERTEX ATTRIBUTES
 
 NAN_METHOD(getAttribLocation){
     NanScope();
@@ -486,7 +419,32 @@ NAN_METHOD(getAttribLocation){
     NanReturnValue(V8_INT(glGetAttribLocation(program,*name)));
 }
 
-//getUniform
+//getActiveAttrib
+
+NAN_METHOD(bindAttribLocation) {
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    glBindAttribLocation(
+            args[0]->Uint32Value(),
+            args[1]->Uint32Value(),
+            *String::Utf8Value(args[2]));
+    NanReturnUndefined();
+}
+
+//endregion
+
+//region UNIFORM VARIABLES
+
+const GLfloat* getUniformFloat32ArrayData(Local<Object> value, int lengthExp){
+    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
+        NanThrowTypeError("Array arg not of type Float32Array.");
+    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
+        stringstream ss;
+        ss << "Float32Array length must be " << lengthExp << ".";
+        NanThrowError(ss.str().c_str());
+    }
+    return static_cast<const GLfloat*>(value->GetIndexedPropertiesExternalArrayData());
+}
 
 NAN_METHOD(getUniformLocation){
     NanScope();
@@ -496,19 +454,13 @@ NAN_METHOD(getUniformLocation){
     NanReturnValue(V8_INT(glGetUniformLocation(program,*name)));
 }
 
-//getVertexAttrib
-//getVertexAttribOffset
-
-const GLfloat* getUniformFloat32ArrayData(Local<Object> value, int lengthExp){
-    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
-        NanThrowTypeError("Array arg not of type Float32Array.");
-    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
-        stringstream ss;
-        ss << "Float32Array lengt must be " << lengthExp << ".";
-        NanThrowError(ss.str().c_str());
-    }
-    return static_cast<const GLfloat*>(value->GetIndexedPropertiesExternalArrayData());
-}
+//getUniformBlockIndex
+//getActiveUniformBlockName
+//getActiveUniformBlockiv
+//getUniformIndices
+//getActiveUniformName
+//getActiveUniform
+//getActiveUniformsiv
 
 NAN_METHOD(uniform1f) {
     NanScope();
@@ -555,6 +507,57 @@ NAN_METHOD(uniform4f) {
     );
     NanReturnUndefined();
 }
+
+NAN_METHOD(uniform1i) {
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    glUniform1i(
+            args[0]->Uint32Value(),
+            args[1]->Int32Value()
+    );
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform2i) {
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    glUniform2i(
+            args[0]->Uint32Value(),
+            args[1]->Int32Value(),
+            args[2]->Int32Value()
+    );
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform3i) {
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    glUniform3i(
+            args[0]->Uint32Value(),
+            args[1]->Int32Value(),
+            args[2]->Int32Value(),
+            args[3]->Int32Value()
+    );
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform4i) {
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    glUniform4i(
+            args[0]->Uint32Value(),
+            args[1]->Int32Value(),
+            args[2]->Int32Value(),
+            args[3]->Int32Value(),
+            args[4]->Int32Value()
+    );
+    NanReturnUndefined();
+}
+
+//uniform1fv
+//uniform2fv
+//uniform3fv
+//uniform4fv
 
 //NAN_METHOD(uniform1fv) {
 //    NanScope();
@@ -616,52 +619,6 @@ NAN_METHOD(uniform4f) {
 //    NanReturnUndefined();
 //}
 
-NAN_METHOD(uniform1i) {
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    glUniform1i(
-            args[0]->Uint32Value(),
-            args[1]->Int32Value()
-    );
-    NanReturnUndefined();
-}
-
-NAN_METHOD(uniform2i) {
-    NanScope();
-    CHECK_ARGS_LEN(3);
-    glUniform2i(
-            args[0]->Uint32Value(),
-            args[1]->Int32Value(),
-            args[2]->Int32Value()
-    );
-    NanReturnUndefined();
-}
-
-NAN_METHOD(uniform3i) {
-    NanScope();
-    CHECK_ARGS_LEN(4);
-    glUniform3i(
-            args[0]->Uint32Value(),
-            args[1]->Int32Value(),
-            args[2]->Int32Value(),
-            args[3]->Int32Value()
-    );
-    NanReturnUndefined();
-}
-
-NAN_METHOD(uniform4i) {
-    NanScope();
-    CHECK_ARGS_LEN(5);
-    glUniform4i(
-            args[0]->Uint32Value(),
-            args[1]->Int32Value(),
-            args[2]->Int32Value(),
-            args[3]->Int32Value(),
-            args[4]->Int32Value()
-    );
-    NanReturnUndefined();
-}
-
 NAN_METHOD(uniformMatrix2fv) {
     NanScope();
     CHECK_ARGS_LEN(3);
@@ -702,6 +659,250 @@ NAN_METHOD(uniformMatrix4fv) {
     NanReturnUndefined();
 }
 
+//glProgramUniform{1234}{ifd}
+//glProgramUniform{1234}{ifd}v
+//glProgramUniform{1234}ui
+//glProgramUniform{1234}uiv
+//glProgramUniformMatrix{234}{fd}v
+//glProgramUniformMatrixf{2x3,3x2,2x4, 4x2,3x4,4x3}{fd}v
+//endregion
+
+//region UNIFORM BUFFER OBJECTS BINDINGS
+//uniformBlockBinding
+//endregion
+
+//region SUBROUTINE UNIFORM VARIABLES
+//getSubroutineUniformLocation
+//getSubroutineIndex
+//getActiveSubroutineUniformiv
+//getActiveSubroutineUniformName
+//getActiveSubroutineName
+//uniformSubroutinesuiv
+//endregion
+
+//region VARYING VARIABLES
+//transformFeedbackVaryings
+//getTransformFeedbackVarying
+//endregion
+
+//region SHADER EXECUTION
+NAN_METHOD(validateProgram) {
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint program = args[0]->Uint32Value();
+    glValidateProgram(program);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(validateProgramPipeline){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint program = args[0]->Uint32Value();
+    glValidateProgramPipeline(program);
+    NanReturnUndefined();
+}
+//endregion
+
+//region TESSELATION CONTROL SHADERS
+//patchParamerterfv
+//endregion
+
+//region FRAGMENT SHADERS
+NAN_METHOD(bindFragDataLocation){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLuint program = args[0]->Uint32Value();
+    GLuint colorNumber = args[1]->Uint32Value();
+    String::Utf8Value name(args[2]);
+    glBindFragDataLocation(program,colorNumber,*name);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(bindFragDataLocationIndexed){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLuint program = args[0]->Uint32Value();
+    GLuint colorNumber = args[1]->Uint32Value();
+    GLuint index = args[2]->Uint32Value();
+    String::Utf8Value name(args[3]);
+    glBindFragDataLocationIndexed(program,colorNumber,index,*name);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(getFragDataLocation){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    String::Utf8Value name(args[1]);
+    GLint location = glGetFragDataLocation(program,*name);
+    NanReturnValue(V8_INT(location));
+}
+
+NAN_METHOD(getFrageDataIndex){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    String::Utf8Value name(args[1]);
+    GLint index = glGetFragDataIndex(program,*name);
+    NanReturnValue(V8_INT(index));
+}
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// SHADER AND PROGRAM QUERIES
+/*--------------------------------------------------------------------------------------------*/
+
+//region SHADER QUERIES
+NAN_METHOD(isShader) {
+    NanScope();
+    NanReturnValue(V8_BOOL(glIsShader(args[0]->Uint32Value())));
+}
+
+NAN_METHOD(getShaderParameter) {
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint shader, paramName;
+    GLint value;
+    shader = args[0]->Uint32Value();
+    paramName = args[1]->Uint32Value();
+    value = 0;
+    switch (paramName) {
+        case GL_COMPILE_STATUS:
+        case GL_DELETE_STATUS:
+            glGetShaderiv(shader, paramName, &value);
+            NanReturnValue(V8_BOOL(static_cast<bool>(value)));
+        default:
+            break;
+    }
+    NanReturnUndefined();
+}
+
+NAN_METHOD(getShaderInfoLog) {
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLsizei len = 1024;
+    GLchar infoLog[len];
+    glGetShaderInfoLog(args[0]->Uint32Value(), len, &len, infoLog);
+    NanReturnValue(V8_STR(infoLog));
+}
+
+NAN_METHOD(getShaderSource) {
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint shader = args[0]->Uint32Value();
+    GLint len;
+    glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &len);
+    GLchar *src = new GLchar[len];
+    glGetShaderSource(shader, len, NULL, src);
+    Local<String> str = V8_STR(src);
+    delete src;
+    NanReturnValue(str);
+}
+
+//getShaderPrecisionFormat
+//getProgramStageiv
+//endregion
+
+//region PROGRAM QUERIES
+//getAttachedShaders
+//getVertexAttrib{d f i}v
+//getVertexAttribl{i ui}v
+//getVertexAttribLdv
+//getVertexAttribPointerv
+//getUniform{f d i ui}v
+//getUniformSubroutineuiv
+
+NAN_METHOD(isProgram) {
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLboolean value = glIsProgram(args[0]->Uint32Value());
+    NanReturnValue(V8_BOOL(value));
+}
+
+//getProgramiv
+
+NAN_METHOD(isProgramPipeline){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLboolean value = glIsProgramPipeline(args[0]->Uint32Value());
+    NanReturnValue(V8_BOOL(value));
+}
+
+//GetProgramPipelineiv
+
+NAN_METHOD(getProgramInfoLog) {
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint program = args[0]->Uint32Value();
+    GLsizei len = 1024;
+    GLchar infoLog[len];
+    glGetProgramInfoLog(program, len, &len, infoLog);
+    NanReturnValue(V8_STR(infoLog));
+}
+
+NAN_METHOD(getProgramPipelineInfoLog){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint pipeline = args[0]->Uint32Value();
+    GLsizei len = 1024;
+    GLchar infoLog[len];
+    glGetProgramPipelineInfoLog(pipeline,len,&len,infoLog);
+    NanReturnValue(V8_STR(infoLog));
+}
+
+NAN_METHOD(getProgramParameter) {
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    GLint params;
+    switch (pname) {
+        case GL_COMPILE_STATUS:
+        case GL_LINK_STATUS:
+            glGetProgramiv(program,pname,&params);
+            NanReturnValue(V8_BOOL(static_cast<bool>(params)));
+        default:
+            break;
+    }
+    NanReturnUndefined();
+}
+
+//getProgramPipelineParameter
+
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// RASTERIZATION
+/*--------------------------------------------------------------------------------------------*/
+
+
+
+
+
+
+//    NAN_METHOD(GetAttachedShaders){}
+
+NAN_METHOD(disableVertexAttribArray){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glDisableVertexAttribArray(args[0]->Uint32Value());
+    NanReturnUndefined();
+}
+
+NAN_METHOD(enableVertexAttribArray){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glEnableVertexAttribArray(args[0]->Uint32Value());
+    NanReturnUndefined();
+}
+
+/*--------------------------------------------------------------------------------------------*/
+// UNIFORMS AND ATTRIBUTES
+/*--------------------------------------------------------------------------------------------*/
+
+
+
+
 NAN_METHOD(vertexAttribPointer){
     NanScope();
     CHECK_ARGS_LEN(6);
@@ -715,6 +916,13 @@ NAN_METHOD(vertexAttribPointer){
     glVertexAttribPointer(index,size,type,normalized,stride, reinterpret_cast<const GLvoid *>(offset));
     NanReturnUndefined();
 }
+
+/*--------------------------------------------------------------------------------------------*/
+// RASTERIZATION
+/*--------------------------------------------------------------------------------------------*/
+
+
+
 
 /*--------------------------------------------------------------------------------------------*/
 // BUFFER
@@ -828,6 +1036,18 @@ NAN_METHOD(isBuffer) {
     NanScope();
     CHECK_ARGS_LEN(1);
     NanReturnValue(V8_BOOL(glIsBuffer(args[0]->Uint32Value())));
+}
+
+NAN_METHOD(copyBufferSubData){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLenum readTarget = args[0]->Uint32Value();
+    GLenum writeTarget = args[1]->Uint32Value();
+    GLintptr readoffset = args[2]->Uint32Value();
+    GLintptr writeoffset = args[3]->Uint32Value();
+    GLsizeiptr size = args[4]->Uint32Value();
+    glCopyBufferSubData(readTarget,writeTarget,readoffset,writeoffset,size);
+    NanReturnUndefined();
 }
 
 /*--------------------------------------------------------------------------------------------*/
@@ -948,20 +1168,61 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_METHOD(pixelStorei);
 
     /*----------------------------------------------------------------------------------------*/
-    // FRAMEBUFFER
+    // WHOLE FRAMEBUFFER
     /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_GL_CONST(NONE);
+    EXPORT_SET_GL_CONST(FRONT_LEFT);
+    EXPORT_SET_GL_CONST(FRONT_RIGHT);
+    EXPORT_SET_GL_CONST(LEFT);
+    EXPORT_SET_GL_CONST(RIGHT);
+    EXPORT_SET_GL_CONST(BACK_LEFT);
+    EXPORT_SET_GL_CONST(BACK_RIGHT);
+    EXPORT_SET_GL_CONST(FRONT);
+    EXPORT_SET_GL_CONST(BACK);
+    EXPORT_SET_GL_CONST(FRONT_AND_BACK);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT0);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT1);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT2);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT3);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT4);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT5);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT6);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT7);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT8);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT9);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT10);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT11);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT12);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT13);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT14);
+    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT15);
+    EXPORT_SET_GL_CONST(AUX0);
+    EXPORT_SET_GL_CONST(AUX1);
+    EXPORT_SET_GL_CONST(AUX2);
+    EXPORT_SET_GL_CONST(AUX3);
+
+    EXPORT_SET_METHOD(drawBuffer);
 
     EXPORT_SET_GL_CONST(DEPTH_BUFFER_BIT);
     EXPORT_SET_GL_CONST(COLOR_BUFFER_BIT);
+    EXPORT_SET_GL_CONST(STENCIL_BUFFER_BIT);
+    EXPORT_SET_GL_CONST(ACCUM_BUFFER_BIT);
+
+    EXPORT_SET_METHOD(colorMask);
+    EXPORT_SET_METHOD(depthMask);
+    EXPORT_SET_METHOD(stencilMask);
+    EXPORT_SET_METHOD(stencilMaskSeparate);
 
     EXPORT_SET_METHOD(clear);
     EXPORT_SET_METHOD(clearColor);
     EXPORT_SET_METHOD(clearDepth);
     EXPORT_SET_METHOD(clearStencil);
-    EXPORT_SET_METHOD(colorMask);
-    EXPORT_SET_METHOD(depthMask);
-    EXPORT_SET_METHOD(stencilMask);
-    EXPORT_SET_METHOD(stencilMaskSeparate);
+    EXPORT_SET_METHOD(clearAccum);
+    EXPORT_SET_METHOD(clearBufferfi);
+
+    EXPORT_SET_METHOD(accum);
+
 
     /*----------------------------------------------------------------------------------------*/
     // VIEW & CLIP
@@ -982,43 +1243,45 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_GL_CONST(COMPILE_STATUS);
     EXPORT_SET_GL_CONST(LINK_STATUS);
 
-    //FRAGMENT SHADERS
-
-    EXPORT_SET_METHOD(bindFragDataLocation);
-    EXPORT_SET_METHOD(bindFragDataLocationIndexed);
-    EXPORT_SET_METHOD(getFragDataLocation);
-    EXPORT_SET_METHOD(getFrageDataIndex);
-
+    //region SHADER OBJECTS
     EXPORT_SET_METHOD(createShader);
-    EXPORT_SET_METHOD(attachShader);
-    EXPORT_SET_METHOD(bindAttribLocation);
-    EXPORT_SET_METHOD(compileShader);
-    EXPORT_SET_METHOD(createProgram);
-    EXPORT_SET_METHOD(createShader);
-    EXPORT_SET_METHOD(deleteProgram);
-    EXPORT_SET_METHOD(deleteShader);
-    EXPORT_SET_METHOD(detachShader);
-    EXPORT_SET_METHOD(getProgramParameter);
-    EXPORT_SET_METHOD(getProgramInfoLog);
-    EXPORT_SET_METHOD(getShaderParameter);
-    EXPORT_SET_METHOD(getShaderInfoLog);
-    EXPORT_SET_METHOD(getShaderSource);
-    EXPORT_SET_METHOD(isProgram);
-    EXPORT_SET_METHOD(isShader);
-    EXPORT_SET_METHOD(linkProgram);
     EXPORT_SET_METHOD(shaderSource);
+    EXPORT_SET_METHOD(compileShader);
+    EXPORT_SET_METHOD(deleteShader);
+    //endregion
+
+    //region PROGRAM OBJECTS
+    EXPORT_SET_METHOD(createProgram);
+    EXPORT_SET_METHOD(attachShader);
+    EXPORT_SET_METHOD(detachShader);
+    EXPORT_SET_METHOD(linkProgram);
     EXPORT_SET_METHOD(useProgram);
-    EXPORT_SET_METHOD(validateProgram);
+    EXPORT_SET_METHOD(deleteProgram);
+    //endregion
 
-    /*----------------------------------------------------------------------------------------*/
-    // UNIFORMS AND ATTRIBUTES
-    /*----------------------------------------------------------------------------------------*/
+    //region PROGRAM PIPELINE OBJECTS
+    EXPORT_SET_METHOD(createProgramPipeline);
+    EXPORT_SET_METHOD(deleteProgramPipeline);
+    EXPORT_SET_METHOD(bindProgramPipeline);
+    EXPORT_SET_METHOD(useProgramStages);
+    EXPORT_SET_METHOD(activeShaderProgram);
+    //endregion
 
-    EXPORT_SET_METHOD(enableVertexAttribArray);
-    EXPORT_SET_METHOD(disableVertexAttribArray);
-    EXPORT_SET_METHOD(getUniformLocation);
+    //region VERTEX ATTRIBUTES
     EXPORT_SET_METHOD(getAttribLocation);
+    //getActiveAttrib
+    EXPORT_SET_METHOD(bindAttribLocation);
+    //endregion
 
+    //region UNIFORM VARIABLES
+    EXPORT_SET_METHOD(getUniformLocation);
+    //getUniformBlockIndex
+    //getActiveUniformBlockName
+    //getActiveUniformBlockiv
+    //getUniformIndices
+    //getActiveUniformName
+    //getActiveUniform
+    //getActiveUniformsiv
     EXPORT_SET_METHOD(uniform1f);
     EXPORT_SET_METHOD(uniform2f);
     EXPORT_SET_METHOD(uniform3f);
@@ -1030,6 +1293,85 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_METHOD(uniformMatrix2fv);
     EXPORT_SET_METHOD(uniformMatrix3fv);
     EXPORT_SET_METHOD(uniformMatrix4fv);
+    //endregion
+
+    //region UNIFORM BUFFER OBJECTS BINDINGS
+    //uniformBlockBinding
+    //endregion
+
+    //region SUBROUTINE UNIFORM VARIABLES
+    //getSubroutineUniformLocation
+    //getSubroutineIndex
+    //getActiveSubroutineUniformiv
+    //getActiveSubroutineUniformName
+    //getActiveSubroutineName
+    //uniformSubroutinesuiv
+    //endregion
+
+    //region VARYING VARIABLES
+    //transformFeedbackVaryings
+    //getTransformFeedbackVarying
+    //endregion
+
+    //region SHADER EXECUTION
+    EXPORT_SET_METHOD(validateProgram);
+    EXPORT_SET_METHOD(validateProgramPipeline);
+    //endregion
+
+    //region FRAGMENT SHADERS
+    EXPORT_SET_METHOD(bindFragDataLocation);
+    EXPORT_SET_METHOD(bindFragDataLocationIndexed);
+    EXPORT_SET_METHOD(getFragDataLocation);
+    EXPORT_SET_METHOD(getFrageDataIndex);
+    //endregion
+
+    /*----------------------------------------------------------------------------------------*/
+    // SHADER AND PROGRAM QUERIES
+    /*----------------------------------------------------------------------------------------*/
+
+    //region SHADER QUERIES
+    EXPORT_SET_METHOD(isShader);
+    EXPORT_SET_METHOD(getShaderParameter);
+    EXPORT_SET_METHOD(getShaderInfoLog);
+    EXPORT_SET_METHOD(getShaderSource);
+    //getShaderPrecisionFormat
+    //getProgramStageiv
+    //endregion
+
+    //region PROGRAM QUERIES
+    //getAttachedShaders
+    //getVertexAttrib{d f i}v
+    //getVertexAttribl{i ui}v
+    //getVertexAttribLdv
+    //getVertexAttribPointerv
+    //getUniform{f d i ui}v
+    //getUniformSubroutineuiv
+    //getProgramiv
+    EXPORT_SET_METHOD(isProgramPipeline);
+    EXPORT_SET_METHOD(isProgram);
+    //GetProgramPipelineiv
+    EXPORT_SET_METHOD(getProgramInfoLog);
+    EXPORT_SET_METHOD(getProgramPipelineInfoLog);
+    EXPORT_SET_METHOD(getProgramParameter);
+    //getProgramPipelineParameter
+    //endregion
+
+
+
+
+
+
+
+    /*----------------------------------------------------------------------------------------*/
+    // UNIFORMS AND ATTRIBUTES
+    /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_METHOD(enableVertexAttribArray);
+    EXPORT_SET_METHOD(disableVertexAttribArray);
+
+
+
+
 
     EXPORT_SET_METHOD(vertexAttribPointer);
 
