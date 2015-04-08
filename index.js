@@ -261,7 +261,102 @@ gl.stencilMaskSeparate = null;
 
 gl.DEPTH_TEST = null;
 
-//PROGRAMS AND SHADERS
+/*--------------------------------------------------------------------------------------------*/
+// PROGRAMS AND SHADERS
+/*--------------------------------------------------------------------------------------------*/
+
+//region SHADER OBJECTS
+gl.createShader = function(type){};
+gl.shaderSource = function(shader,string){};
+gl.compileShader = function(shader){};
+gl.deleteShader = function(shader){};
+//endregion
+
+//region PROGRAM OBJECTS
+gl.createProgram = function(){};
+gl.attachShader = function(program,shader){};
+gl.detachShader = function(program,shader){};
+gl.linkProgram = function(program){};
+gl.useProgram = function(program){};
+gl.getProgramParameter = function(program,pname){};
+gl.deleteProgram = function(program){};
+//endregion
+
+//region PROGRAM PIPELINE OBJECTS
+gl.createProgramPipeline = function(){};
+gl.deleteProgramPipeline = function(pipeline){};
+gl.bindProgramPipeline = function(pipeline){};
+gl.useProgramStages = function(pipeline,stages,program){};
+gl.activeShaderProgram = function(pipeline,program){};
+//endregion
+
+//region VERTEX ATTRIBUTES
+gl.getAttribLocation = function(program,name){};
+gl.bindAttribLocation = function(program,name){};
+//endregion
+
+//region UNIFORM VARIABLES
+gl.getUniformLocation = function(program,name){};
+gl.uniform1f = function(location,x){};
+gl.uniform2f = function(location,x,y){};
+gl.uniform3f = function(location,x,y,z){};
+gl.uniform4f = function(location,x,y,z,w){};
+gl.uniform1i = function(location,x){};
+gl.uniform2i = function(location,x,y){};
+gl.uniform3i = function(location,x,y,z){};
+gl.uniform4i = function(location,x,y,z,w){};
+gl.uniformMatrix2fv = function(location,transpose,value){};
+gl.uniformMatrix3fv = function(location,transpose,value){};
+gl.uniformMatrix4fv = function(location,transpose,value){};
+//endregion
+
+//region UNIFORM BUFFER OBJECTS BINDING
+//uniformBlockBinding
+//endregion
+
+//region SUBROUTINE UNIFORM VARIABLES
+//getSubroutineUniformLocation
+//getSubroutineIndex
+//getActiveSubroutineUniformiv
+//getActiveSubroutineUniformName
+//getActiveSubroutineName
+//uniformSubroutinesuiv
+//endregion
+
+//region VARYING VARIABLES
+//transformFeedbackVaryings
+//getTransformFeedbackVarying
+//endregion
+
+//region SHADER EXECUTION
+gl.validateProgram = function(program){};
+gl.validateProgramPipeline = function(pipeline){};
+//endregion
+
+//region FRAGMENT SHADERS
+gl.bindFragDataLocation = function(program,colorNumber,name){};
+gl.bindFragDataLocationIndex = function(program,colorNumber,index,name){};
+gl.getFragDataLocation = function(program,name){};
+gl.getFragDataIndex = function(program,name){};
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// SHADER AND PROGRAM QUERIES
+/*--------------------------------------------------------------------------------------------*/
+
+//region SHADER QUERIES
+gl.isShader = function(shader){};
+gl.getShaderInfoLog = function(shader){};
+gl.getShaderSource = function(shader){};
+//endregion
+
+//region PROGRAM QUERIES
+gl.isProgramPipeline = function(pipeline){};
+gl.isProgram = function(program){};
+gl.getProgramInfoLog = function(program){};
+gl.getProgramPipelineInfoLog = function(program){};
+gl.getShaderParameter = function(shader,pname){};
+//endregion
 
 gl.viewport =
 gl.depthRange =
@@ -274,53 +369,14 @@ gl.LINK_STATUS = null;
 
 //fragment shaders
 
-gl.bindFragDataLocation =
-gl.bindFragDataLocationIndex =
-gl.getFragDataLocation =
-gl.getFragDataIndex = null;
-
-gl.createShader =
-gl.attachShader =
-gl.bindAttribLocation =
-gl.compileShader =
-gl.createProgram =
-gl.deleteProgram =
-gl.deleteShader =
-gl.detachShader = null;
-
-gl.getProgramParameter =
-gl.getProgramInfoLog =
-gl.getShaderParameter=
-gl.getShaderInfoLog =
-gl.getShaderSource =
-gl.isProgram =
-gl.isShader =
-gl.linkProgram =
-gl.shaderSource =
-gl.useProgram =
-gl.validateProgram = null;
-
 //UNIFORMS AND ATTRIBUTES
 
 gl.disableVertexAttribArray =
 gl.enableVertexAttribArray =
-gl.getAttribLocation =
-gl.getUniformLocation =
-gl.uniform1f =
-gl.uniform2f =
-gl.uniform3f =
-gl.uniform4f =
 //gl.uniform1fv =
 //gl.uniform2fv =
 //gl.uniform3fv =
 //gl.uniform4fv =
-gl.uniform1i =
-gl.uniform2i =
-gl.uniform3i =
-gl.uniform4i =
-gl.uniformMatrix2fv =
-gl.uniformMatrix3fv =
-gl.uniformMatrix4fv =
 gl.vertexAttribPointer = null;
 
 //BUFFER
