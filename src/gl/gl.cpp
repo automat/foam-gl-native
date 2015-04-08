@@ -108,131 +108,6 @@ NAN_METHOD(isEnabled){
     NanReturnValue(V8_BOOL(enabled));
 }
 
-NAN_METHOD(pixelStorei){
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    GLenum pname = args[0]->Uint32Value();
-    GLint  param = args[0]->Int32Value();
-    glPixelStorei(pname,param);
-    NanReturnUndefined();
-}
-
-/*--------------------------------------------------------------------------------------------*/
-// WHOLE FRAMEBUFFER
-/*--------------------------------------------------------------------------------------------*/
-
-NAN_METHOD(drawBuffer){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    GLenum buf = args[0]->Uint32Value();
-    glDrawBuffer(buf);
-    NanReturnUndefined();
-}
-
-//drawBuffers
-
-NAN_METHOD(colorMask){
-    NanScope();
-    CHECK_ARGS_LEN(4);
-    glColorMask(
-            static_cast<GLboolean>(args[0]->BooleanValue()),
-            static_cast<GLboolean>(args[1]->BooleanValue()),
-            static_cast<GLboolean>(args[2]->BooleanValue()),
-            static_cast<GLboolean>(args[3]->BooleanValue())
-    );
-    NanReturnUndefined();
-}
-
-NAN_METHOD(depthMask){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glDepthMask(static_cast<GLboolean>(args[0]->BooleanValue()));
-    NanReturnUndefined();
-}
-
-NAN_METHOD(stencilMask){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glStencilMask(args[0]->Uint32Value());
-    NanReturnUndefined();
-}
-
-NAN_METHOD(stencilMaskSeparate){
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    glStencilMaskSeparate(
-            args[0]->Uint32Value(),
-            args[1]->Uint32Value()
-    );
-    NanReturnUndefined();
-}
-
-NAN_METHOD(clear){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glClear(args[0]->Uint32Value());
-    NanReturnUndefined();
-}
-
-NAN_METHOD(clearColor){
-    NanScope();
-    CHECK_ARGS_LEN(4);
-    glClearColor(
-            static_cast<GLfloat>(args[0]->NumberValue()),
-            static_cast<GLfloat>(args[1]->NumberValue()),
-            static_cast<GLfloat>(args[2]->NumberValue()),
-            static_cast<GLfloat>(args[3]->NumberValue())
-    );
-    NanReturnUndefined();
-}
-
-NAN_METHOD(clearDepth){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glClearDepth(static_cast<GLfloat>(args[0]->NumberValue()));
-    NanReturnUndefined();
-}
-
-NAN_METHOD(clearStencil){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    glClearStencil(args[0]->Int32Value());
-    NanReturnUndefined();
-}
-
-NAN_METHOD(clearAccum){
-    NanScope();
-    CHECK_ARGS_LEN(4);
-    GLfloat r = static_cast<GLfloat>(args[0]->NumberValue());
-    GLfloat g = static_cast<GLfloat>(args[1]->NumberValue());
-    GLfloat b = static_cast<GLfloat>(args[2]->NumberValue());
-    GLfloat a = static_cast<GLfloat>(args[3]->NumberValue());
-    glClearAccum(r,g,b,a);
-    NanReturnUndefined();
-}
-
-//clearBuffer{if ui}v
-
-NAN_METHOD(clearBufferfi){
-    NanScope();
-    CHECK_ARGS_LEN(4);
-    GLenum buf = args[0]->Uint32Value();
-    GLint drawbuffer = args[1]->Int32Value();
-    GLfloat depth = static_cast<GLfloat>(args[2]->NumberValue());
-    GLint stencil = args[3]->Int32Value();
-    glClearBufferfi(buf,drawbuffer,depth,stencil);
-    NanReturnUndefined();
-}
-
-NAN_METHOD(accum){
-    NanScope();
-    CHECK_ARGS_LEN(2);
-    GLenum op = args[0]->Uint32Value();
-    GLfloat value = static_cast<GLfloat>(args[1]->NumberValue());
-    glAccum(op,value);
-    NanReturnUndefined();
-}
-
 
 /*--------------------------------------------------------------------------------------------*/
 // VIEW & CLIP
@@ -875,9 +750,337 @@ NAN_METHOD(getProgramParameter) {
 // RASTERIZATION
 /*--------------------------------------------------------------------------------------------*/
 
+//region MULTISAMPLING
+NAN_METHOD(getMultisamplefv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum pname = args[0]->Uint32Value();
+    GLuint index = args[1]->Uint32Value();
+    GLfloat val[2] = {0.0f, 0.0f};
+    glGetMultisamplefv(pname,index,val);
+    Local<Array> out = Array::New(2);
+    out->Set(0,V8_NUM(val[0]));
+    out->Set(1,V8_NUM(val[1]));
+    NanReturnValue(out);
+}
+
+NAN_METHOD(minSampleShading){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLclampf value = static_cast<GLclampf>(args[0]->NumberValue());
+    glMinSampleShading(value);
+    NanReturnUndefined();
+}
+//endregion
+
+//region POINTS
+NAN_METHOD(pointSize){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLfloat size = static_cast<GLfloat>(args[0]->NumberValue());
+    glPointSize(size);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(pointParameteri){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum pname = args[0]->Uint32Value();
+    GLint  param = args[1]->Int32Value();
+    glPointParameteri(pname,param);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(pointParameterf){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum  pname = args[0]->Uint32Value();
+    GLfloat param = static_cast<GLfloat>(args[1]->NumberValue());
+    glPointParameterf(pname,param);
+    NanReturnUndefined();
+}
+
+//pointParameteriv
+//pointParameterfv
+
+//endregion
+
+//region LINE SEGMENTS
+NAN_METHOD(lineWidth){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLfloat value = static_cast<GLfloat>(args[0]->NumberValue());
+    glLineWidth(value);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(lineStipple){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLint factor = args[0]->Int32Value();
+    GLushort pattern = static_cast<GLushort>(args[1]->Uint32Value());
+    glLineStipple(factor,pattern);
+    NanReturnUndefined();
+}
+//endregion
+
+//region POLYGONS
+NAN_METHOD(frontFace){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum dir = args[0]->Uint32Value();
+    glFrontFace(dir);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(cullFace){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum mode = args[0]->Uint32Value();
+    glFrontFace(mode);
+    NanReturnUndefined();
+}
+//endregion
+
+//region STIPPLING
+//polygonStipple
+//getPolygonStipple
+//endregion
+
+//region POLYGON RASTERIZATION & DEPTH OFFSET
+//polygonMode
+NAN_METHOD(polygonOffset){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLfloat factor = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat units = static_cast<GLfloat>(args[1]->NumberValue());
+    glPolygonOffset(factor,units);
+    NanReturnUndefined();
+}
+//endregion
+
+//region PIXEL STORAGE MODES
+NAN_METHOD(pixelStorei){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum pname = args[0]->Uint32Value();
+    GLint  param = args[1]->Int32Value();
+    glPixelStorei(pname,param);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(pixelStoref){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum pname = args[0]->Uint32Value();
+    GLfloat param = static_cast<GLfloat>(args[1]->Int32Value());
+    glPixelStoref(pname,param);
+    NanReturnUndefined();
+}
+//endregion
+
+//region PIXEL TRANSFER MODES
+//pixelTransfer{if}
+//pixelMap{ui us f}v
+//getPixelMap{ui us f}v
+//endregion
+
+//region COLOR TABLE SPECIFIATION
+//colorTable
+//colorTableParameter{if}v
+//copyColorTable
+//colorSubTable
+//copyColorSubTable
+//getColorTable
+//getColorTableParameter{if}v
+//convolutionFilter2D
+//convolutionFilter1D
+//convolutionParameter{if}v
+//seperateFilter2D
+//copyConvolutionFilter2D
+//copyConvolutionFilter1D
+//getConvolutionFilter
+//getSeparableFilter
+//getConvolutionParameter{if}v
+//histogram
+//getHistogram
+//resetHistogram
+//getHistogramParameter{if}v
+//minmax
+//getMinmax
+//resetMinmax
+//getMinmaxParameter{if}v
+//endregion
+
+//region RASTERIZATION OF PIXEL RECTANGLES
+//drawPixels
+//clampColor
+//endregion
+
+//region PIXEL TRANSFER OPERATIONS
+//convolutionParameter
+//endregion
+
+//region BITMAPS
+//Bitmap
+//endregion
 
 
+/*--------------------------------------------------------------------------------------------*/
+// WHOLE FRAMEBUFFER
+/*--------------------------------------------------------------------------------------------*/
 
+//region SELECTING A BUFFER FOR WRITING
+NAN_METHOD(drawBuffer){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum buf = args[0]->Uint32Value();
+    glDrawBuffer(buf);
+    NanReturnUndefined();
+}
+
+//drawBuffers
+//endregion
+
+//region FINE CONTROL OF BUFFER UPDATES
+NAN_METHOD(indexMask){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint mask = args[0]->Uint32Value();
+    glIndexMask(mask);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(colorMask){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLboolean r = static_cast<GLboolean>(args[0]->BooleanValue());
+    GLboolean g = static_cast<GLboolean>(args[1]->BooleanValue());
+    GLboolean b = static_cast<GLboolean>(args[2]->BooleanValue());
+    GLboolean a = static_cast<GLboolean>(args[3]->BooleanValue());
+    glColorMask(r,g,b,a);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(colorMaski){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLuint buf = args[0]->Uint32Value();
+    GLboolean r = static_cast<GLboolean>(args[0]->BooleanValue());
+    GLboolean g = static_cast<GLboolean>(args[1]->BooleanValue());
+    GLboolean b = static_cast<GLboolean>(args[2]->BooleanValue());
+    GLboolean a = static_cast<GLboolean>(args[3]->BooleanValue());
+    glColorMaski(buf,r,g,b,a);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(depthMask){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLboolean mask = static_cast<GLboolean>(args[0]->BooleanValue());
+    glDepthMask(mask);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(stencilMask){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLboolean mask = static_cast<GLboolean>(args[0]->BooleanValue());
+    glStencilMask(mask);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(stencilMaskSeparate){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum face = args[0]->Uint32Value();
+    GLuint mask = args[1]->Uint32Value();
+    glStencilMaskSeparate(face,mask);
+    NanReturnUndefined();
+}
+//endregion
+
+//region CLEARING THE BUFFERS
+NAN_METHOD(clear){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glClear(args[0]->Uint32Value());
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearColor){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLfloat r = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat g = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat b = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat a = static_cast<GLfloat>(args[3]->NumberValue());
+    glClearColor(r,g,b,a);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearIndex){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLfloat index = static_cast<GLfloat>(args[0]->NumberValue());
+    glClearIndex(index);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearDepth){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glClearDepth(static_cast<GLfloat>(args[0]->NumberValue()));
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearStencil){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    glClearStencil(args[0]->Int32Value());
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clearAccum){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLfloat r = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat g = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat b = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat a = static_cast<GLfloat>(args[3]->NumberValue());
+    glClearAccum(r,g,b,a);
+    NanReturnUndefined();
+}
+
+//clearBuffer{if ui}v
+
+NAN_METHOD(clearBufferfi){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLenum buf = args[0]->Uint32Value();
+    GLint drawbuffer = args[1]->Int32Value();
+    GLfloat depth = static_cast<GLfloat>(args[2]->NumberValue());
+    GLint stencil = args[3]->Int32Value();
+    glClearBufferfi(buf,drawbuffer,depth,stencil);
+    NanReturnUndefined();
+}
+
+//endregion
+
+//region ACCUMULATION BUFFER
+NAN_METHOD(accum){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum op = args[0]->Uint32Value();
+    GLfloat value = static_cast<GLfloat>(args[1]->NumberValue());
+    glAccum(op,value);
+    NanReturnUndefined();
+}
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// COLOR SUM, FOG AND HINTS
+/*--------------------------------------------------------------------------------------------*/
 
 
 //    NAN_METHOD(GetAttachedShaders){}
@@ -1202,28 +1405,6 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_GL_CONST(AUX2);
     EXPORT_SET_GL_CONST(AUX3);
 
-    EXPORT_SET_METHOD(drawBuffer);
-
-    EXPORT_SET_GL_CONST(DEPTH_BUFFER_BIT);
-    EXPORT_SET_GL_CONST(COLOR_BUFFER_BIT);
-    EXPORT_SET_GL_CONST(STENCIL_BUFFER_BIT);
-    EXPORT_SET_GL_CONST(ACCUM_BUFFER_BIT);
-
-    EXPORT_SET_METHOD(colorMask);
-    EXPORT_SET_METHOD(depthMask);
-    EXPORT_SET_METHOD(stencilMask);
-    EXPORT_SET_METHOD(stencilMaskSeparate);
-
-    EXPORT_SET_METHOD(clear);
-    EXPORT_SET_METHOD(clearColor);
-    EXPORT_SET_METHOD(clearDepth);
-    EXPORT_SET_METHOD(clearStencil);
-    EXPORT_SET_METHOD(clearAccum);
-    EXPORT_SET_METHOD(clearBufferfi);
-
-    EXPORT_SET_METHOD(accum);
-
-
     /*----------------------------------------------------------------------------------------*/
     // VIEW & CLIP
     /*----------------------------------------------------------------------------------------*/
@@ -1356,10 +1537,135 @@ void gl::init(Handle<Object> exports) {
     //getProgramPipelineParameter
     //endregion
 
+    /*----------------------------------------------------------------------------------------*/
+    // RASTERIZATION
+    /*----------------------------------------------------------------------------------------*/
 
+    //region MULTISAMPLING
+    EXPORT_SET_METHOD(getMultisamplefv);
+    EXPORT_SET_METHOD(minSampleShading);
+    //endregion
 
+    //region POINTS
+    EXPORT_SET_METHOD(pointSize);
+    EXPORT_SET_METHOD(pointParameteri);
+    EXPORT_SET_METHOD(pointParameterf);
+    //pointParameteriv
+    //pointParameterfv
+    //endregion
 
+    //region LINE SEGMENTS
+    EXPORT_SET_METHOD(lineWidth);
+    EXPORT_SET_METHOD(lineStipple);
+    //endregion
 
+    //region POLYGONS
+    EXPORT_SET_METHOD(frontFace);
+    EXPORT_SET_METHOD(cullFace);
+    //endregion
+
+    //region STIPPLING
+    //polygonStipple
+    //getPolygonStipple
+    //endregion
+
+    //region POLYGON RASTERIZATION & DEPTH OFFSET
+    //polygonMode
+    EXPORT_SET_METHOD(polygonOffset);
+    //endregion
+
+    //region PIXEL STORAGE MODES
+    EXPORT_SET_METHOD(pixelStorei);
+    EXPORT_SET_METHOD(pixelStoref);
+    //endregion
+
+    //region PIXEL TRANSFER MODES
+    //pixelTransfer{if}
+    //pixelMap{ui us f}v
+    //getPixelMap{ui us f}v
+    //endregion
+
+    //region COLOR TABLE SPECIFIATION
+    //colorTable
+    //colorTableParameter{if}v
+    //copyColorTable
+    //colorSubTable
+    //copyColorSubTable
+    //getColorTable
+    //getColorTableParameter{if}v
+    //convolutionFilter2D
+    //convolutionFilter1D
+    //convolutionParameter{if}v
+    //seperateFilter2D
+    //copyConvolutionFilter2D
+    //copyConvolutionFilter1D
+    //getConvolutionFilter
+    //getSeparableFilter
+    //getConvolutionParameter{if}v
+    //histogram
+    //getHistogram
+    //resetHistogram
+    //getHistogramParameter{if}v
+    //minmax
+    //getMinmax
+    //resetMinmax
+    //getMinmaxParameter{if}v
+    //endregion
+
+    //region RASTERIZATION OF PIXEL RECTANGLES
+    //drawPixels
+    //clampColor
+    //endregion
+
+    //region PIXEL TRANSFER OPERATIONS
+    //convolutionParameter
+    //endregion
+
+    //region BITMAPS
+    //Bitmap
+    //endregion
+
+    /*----------------------------------------------------------------------------------------*/
+    // WHOLE FRAMEBUFFER
+    /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_GL_CONST(DEPTH_BUFFER_BIT);
+    EXPORT_SET_GL_CONST(COLOR_BUFFER_BIT);
+    EXPORT_SET_GL_CONST(STENCIL_BUFFER_BIT);
+    EXPORT_SET_GL_CONST(ACCUM_BUFFER_BIT);
+
+    //region SELECTING A BUFFER FOR WRITING
+    EXPORT_SET_METHOD(drawBuffer);
+    //drawBuffers
+    //endregion
+
+    //region FINE CONTROL OF BUFFER UPDATES
+    EXPORT_SET_METHOD(indexMask);
+    EXPORT_SET_METHOD(colorMask);
+    EXPORT_SET_METHOD(colorMaski);
+    EXPORT_SET_METHOD(depthMask);
+    EXPORT_SET_METHOD(stencilMask);
+    EXPORT_SET_METHOD(stencilMaskSeparate);
+    //endregion
+
+    //region CLEARING THE BUFFERS
+    EXPORT_SET_METHOD(clear);
+    EXPORT_SET_METHOD(clearColor);
+    EXPORT_SET_METHOD(clearIndex);
+    EXPORT_SET_METHOD(clearDepth);
+    EXPORT_SET_METHOD(clearStencil);
+    EXPORT_SET_METHOD(clearAccum);
+    //clearBuffer{if ui}v
+    EXPORT_SET_METHOD(clearBufferfi);
+    //endregion
+
+    //region ACCUMULATION BUFFER
+    EXPORT_SET_METHOD(accum);
+    //endregion
+
+    /*----------------------------------------------------------------------------------------*/
+    // COLOR SUM, FOG AND HINTS
+    /*----------------------------------------------------------------------------------------*/
 
 
     /*----------------------------------------------------------------------------------------*/
