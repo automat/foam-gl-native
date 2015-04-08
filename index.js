@@ -248,16 +248,7 @@ gl.pixelStorei = null;
 //FRAMEBUFFER
 
 gl.COLOR_BUFFER_BIT =
-gl.DEPTH_BUFFER_BIT =
-gl.clearColor =
-gl.clear =
-gl.clearDepth =
-gl.clearColor =
-gl.clearStencil =
-gl.colorMask =
-gl.depthMask =
-gl.stencilMask =
-gl.stencilMaskSeparate = null;
+gl.DEPTH_BUFFER_BIT = null;
 
 gl.DEPTH_TEST = null;
 
@@ -357,6 +348,93 @@ gl.getProgramInfoLog = function(program){};
 gl.getProgramPipelineInfoLog = function(program){};
 gl.getShaderParameter = function(shader,pname){};
 //endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// RASTERIZATION
+/*--------------------------------------------------------------------------------------------*/
+
+//region MULTISAMPLING
+gl.getMultisamplefv = function(pname,index){};
+gl.minSampleShading = function(value){};
+//endregion
+
+//region POINTS
+gl.pointSize = function(size){};
+gl.pointParameteri = function(pname,param){};
+gl.pointParameterf = function(pname,param){};
+//pointParameteriv
+//pointParameterfv
+//endregion
+
+//region LINE SEGMENTS
+gl.lineWidth = function(size){};
+gl.lineStipple = function(factor,pattern){};
+//endregion
+
+//region POLYGONS
+gl.frontFace = function(dir){};
+gl.cullFace = function(mode){};
+//endregion
+
+//region STIPPLING
+//endregion
+
+//region POLYGON RASTERIZATION & DEPTH OFFSET
+gl.polygonOffset = function(factor,units){};
+//endregion
+
+//region PIXEL STORAGE MODES
+gl.pixelStorei = function(pname,param){};
+gl.pixelStoref = function(pname,param){};
+//endregion
+
+//region COLOR TABLE SPECIFIATION
+//endregion
+
+//region RASTERIZATION OF PIXEL RECTANGLES
+//endregion
+
+//region PIXEL TRANSFER OPERATIONS
+//endregion
+
+//region BITMAPS
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// WHOLE FRAMEBUFFER
+/*--------------------------------------------------------------------------------------------*/
+
+//region SELECTING A BUFFER FOR WRITING
+gl.drawBuffer = function(buf){};
+//endregion
+
+//region FINE CONTROL OF BUFFER UPDATES
+gl.indexMask = function(mask){};
+gl.colorMask = function(r,g,b,a){};
+gl.colorMaski = function(buf,r,g,b,a){};
+gl.depthMask = function(mask){};
+gl.stencilMask = function(mask){};
+gl.stencilMaskSeparate = function(face,mask){};
+//endregion
+
+//region CLEARING THE BUFFERS
+gl.clear = function(buf){};
+gl.clearColor = function(r,g,b,a){};
+gl.clearIndex = function(index){};
+gl.clearDepth = function(d){};
+gl.clearStencil = function(d){};
+gl.clearAccum = function(r,g,b,a){};
+gl.clearBufferfi = function(buffer,drawbuffer,depth,stencil){};
+//endregion
+
+//region ACCUMULATION BUFFER
+gl.accum = function(op,value){};
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// COLOR SUM, FOG AND HINTS
+/*--------------------------------------------------------------------------------------------*/
+
 
 gl.viewport =
 gl.depthRange =
