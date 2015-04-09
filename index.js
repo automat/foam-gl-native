@@ -214,6 +214,44 @@ ContextGLNative.prototype.update = function () {
 
 var gl = ContextGLNative.gl = {};
 
+/*--------------------------------------------------------------------------------------------*/
+// OPENGL ERROR
+/*--------------------------------------------------------------------------------------------*/
+
+gl.getError = function(){};
+
+/*--------------------------------------------------------------------------------------------*/
+// VERTEX ARRAYS
+/*--------------------------------------------------------------------------------------------*/
+
+gl.vertexPointer = function(size,type,stride,pointer){};
+gl.normalPointer = function(type,stride,pointer){};
+gl.colorPointer = function(size,type,stride,pointer){};
+gl.secondaryColorPointer = function(size,type,stride,pointer){};
+gl.indexPointer = function(type,stride,pointer){};
+gl.edgeFlagPointer = function(stride,pointer){};
+gl.fogCoordPointer = function(type,stride,pointer){};
+gl.texCoordPointer = function(size,type,stride,pointer){};
+gl.vertexAttribPointer = function(index,size,type,normalized,stride,pointer){};
+gl.vertexAttribIPointer = function(index,size,type,stride,pointer){};
+gl.vertexAttribLPointer = function(index,size,type,stride,pointer){};
+gl.enableClientState = function(array){};
+gl.disableClientState = function(array){};
+gl.vertexAttribDivisor = function(index,divisor){};
+gl.clientActiveTexture = function(texture){};
+gl.arrayElement = function(i){};
+
+//region DRAWING COMMANDS
+gl.drawArrays = function(mode,first,count){};
+gl.drawArraysInstanced = function(mode,first,count,primcount){};
+gl.drawElements = function(mode,count,type,indices){};
+gl.drawRangeElements = function(mode,start,end,count,type,indices){};
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// VERTEX SPECIFICATIONS
+/*--------------------------------------------------------------------------------------------*/
+
 
 gl.FLOAT =
 gl.VERTEX_PROGRAM_POINT_SIZE = null;
@@ -522,9 +560,7 @@ gl.TRIANGLES =
 gl.TRIANGLE_STRIP =
 gl.TRIANGLE_FAN = null;
 
-gl.drawArrays =
-gl.drawElements =
-gl.drawRangeElements = null;
+
 
 
 for(var p in gl){
