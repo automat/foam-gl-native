@@ -1082,6 +1082,182 @@ NAN_METHOD(accum){
 // COLOR SUM, FOG AND HINTS
 /*--------------------------------------------------------------------------------------------*/
 
+NAN_METHOD(fogi){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum pname = args[0]->Uint32Value();
+    GLint  param = args[1]->Int32Value();
+    glFogi(pname,param);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(fogf){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum pname = args[0]->Uint32Value();
+    GLfloat param = static_cast<GLfloat>(args[0]->Int32Value());
+    glFogf(pname,param);
+    NanReturnUndefined();
+}
+
+//fog{if}v
+
+/*--------------------------------------------------------------------------------------------*/
+// TEXTURING
+/*--------------------------------------------------------------------------------------------*/
+
+NAN_METHOD(activeTexture){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum texture = args[0]->Uint32Value();
+    glActiveTexture(texture);
+    NanReturnUndefined();
+}
+
+//region TEXTURE OBJECTS
+NAN_METHOD(bindTexture){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum target = args[0]->Uint32Value();
+    GLuint texture = args[1]->Uint32Value();
+    glBindTexture(target,texture);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(createTexture){
+    NanScope();
+    GLuint texture = 0;
+    glGenTextures(1,&texture);
+    NanReturnValue(V8_INT(texture));
+}
+
+NAN_METHOD(deleteTexture){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint texture = args[0]->Uint32Value();
+    glDeleteTextures(1,&texture);
+    NanReturnUndefined();
+}
+
+//areTexturesResident
+//prioritizeTextures
+//endregion
+
+//region SAMPLER OBJECTS
+NAN_METHOD(createSampler){
+    NanScope();
+    GLuint sampler = 0;
+    glGenSamplers(1,&sampler);
+    NanReturnValue(V8_INT(sampler));
+}
+
+NAN_METHOD(bindSampler){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint unit = args[0]->Uint32Value();
+    GLuint sampler = args[1]->Uint32Value();
+    glBindSampler(unit,sampler);
+    NanReturnUndefined();
+}
+
+//samplerParameter{if}v
+//samplerParameterI{u ui}v
+
+NAN_METHOD(deleteSampler){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint sampler = args[0]->Uint32Value();
+    glDeleteSamplers(1,&sampler);
+    NanReturnUndefined();
+}
+//endregion
+
+//region TEXTURE IMAGE SPEC
+//texImage3d
+//texImage2d
+//texImage1d
+//endregion
+
+//region ALTERNATE TEXTURE IMAGE SPEC
+NAN_METHOD(copyTexImage2D){
+    NanScope();
+    CHECK_ARGS_LEN(8);
+    GLenum target = args[0]->Uint32Value();
+    GLint level = args[1]->Int32Value();
+    GLenum internalformat = args[2]->Uint32Value();
+    GLint x = args[3]->Int32Value();
+    GLint y = args[4]->Int32Value();
+    GLsizei width = args[5]->Uint32Value();
+    GLsizei height = args[6]->Uint32Value();
+    GLint border = args[7]->Int32Value();
+    glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(copyTexImage1D){
+    NanScope();
+    CHECK_ARGS_LEN(7);
+    GLenum target = args[0]->Uint32Value();
+    GLint level = args[1]->Int32Value();
+    GLenum internalformat = args[2]->Uint32Value();
+    GLint x = args[3]->Int32Value();
+    GLint y = args[4]->Int32Value();
+    GLsizei width = args[5]->Uint32Value();
+    GLint border = args[6]->Int32Value();
+    glCopyTexImage1D(target,level,internalformat,x,y,width,border);
+    NanReturnUndefined();
+}
+
+//texSubImage3D
+//texSubImage2D
+//texSubImage1D
+
+NAN_METHOD(copyTexSubImage3D){
+    NanScope();
+    CHECK_ARGS_LEN(9);
+    GLenum target = args[0]->Uint32Value();
+    GLint level = args[1]->Int32Value();
+    GLint xoffset = args[2]->Int32Value();
+    GLint yoffset = args[3]->Int32Value();
+    GLint zoffset = args[4]->Int32Value();
+    GLint x = args[5]->Int32Value();
+    GLint y = args[6]->Int32Value();
+    GLsizei width = args[7]->Uint32Value();
+    GLsizei height = args[8]->Uint32Value();
+    glCopyTexSubImage3D(target,level,xoffset,yoffset,zoffset,x,y,width,height);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(copyTexSubImage2D){
+    NanScope();
+    CHECK_ARGS_LEN(8);
+    GLenum target = args[0]->Uint32Value();
+    GLint level = args[1]->Int32Value();
+    GLint xoffset = args[2]->Int32Value();
+    GLint yoffset = args[3]->Int32Value();
+    GLint x = args[4]->Int32Value();
+    GLint y = args[5]->Int32Value();
+    GLsizei width = args[6]->Uint32Value();
+    GLsizei height = args[7]->Uint32Value();
+    glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(copyTexSubImage1D){
+    NanScope();
+    CHECK_ARGS_LEN(6);
+    GLenum target = args[0]->Uint32Value();
+    GLint level = args[1]->Int32Value();
+    GLint xoffset = args[2]->Int32Value();
+    GLint x = args[3]->Int32Value();
+    GLint y = args[4]->Int32Value();
+    GLsizei width = args[5]->Uint32Value();
+    glCopyTexSubImage1D(target,level,xoffset,x,y,width);
+    NanReturnUndefined();
+}
+//endregion
+
+
 
 //    NAN_METHOD(GetAttachedShaders){}
 
@@ -1666,6 +1842,51 @@ void gl::init(Handle<Object> exports) {
     /*----------------------------------------------------------------------------------------*/
     // COLOR SUM, FOG AND HINTS
     /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_METHOD(fogi);
+    EXPORT_SET_METHOD(fogf);
+    //fog{if}v
+
+    /*----------------------------------------------------------------------------------------*/
+    // TEXTURING
+    /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_METHOD(activeTexture);
+
+    //region TEXTURE OBJECTS
+    EXPORT_SET_METHOD(bindTexture);
+    EXPORT_SET_METHOD(createTexture);
+    EXPORT_SET_METHOD(deleteTexture);
+    //areTexturesResident
+    //prioritizeTextures
+    //endregion
+
+    //region SAMPLER OBJECTS
+    EXPORT_SET_METHOD(createSampler);
+    EXPORT_SET_METHOD(bindSampler);
+    //samplerParameter{if}v
+    //samplerParameterI{u ui}v
+    EXPORT_SET_METHOD(deleteSampler);
+    //endregion
+
+    //region TEXTURE IMAGE SPEC
+    ///texImage3d
+    //texImage2d
+    //texImage1d
+    //endregion
+
+    //region ALTERNATE TEXTURE IMAGE SPEC
+    EXPORT_SET_METHOD(copyTexImage2D);
+    EXPORT_SET_METHOD(copyTexImage1D);
+    //texSubImage3D
+    //texSubImage2D
+    //texSubImage1D
+    EXPORT_SET_METHOD(copyTexSubImage3D);
+    EXPORT_SET_METHOD(copyTexSubImage2D);
+    EXPORT_SET_METHOD(copyTexSubImage1D);
+    //endregion
+
+
 
 
     /*----------------------------------------------------------------------------------------*/
