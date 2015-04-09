@@ -435,6 +435,37 @@ gl.accum = function(op,value){};
 // COLOR SUM, FOG AND HINTS
 /*--------------------------------------------------------------------------------------------*/
 
+gl.fogi = function(pname,param){};
+gl.fogf = function(pname,param){};
+
+/*--------------------------------------------------------------------------------------------*/
+// TEXTURING
+/*--------------------------------------------------------------------------------------------*/
+
+gl.activeTexture = function(texture){};
+
+//region TEXTURE_OBJECTS
+gl.bindTexture = function(target,texture){};
+gl.createTexture = function(){};
+gl.deleteTexture = function(texture){};
+//endregion
+
+//region SAMPLER OBJECTS
+gl.createSampler = function(){};
+gl.bindSampler = function(unit,sampler){};
+gl.deleteSampler = function(sampler){};
+//endregion
+
+//region TEXTURE IMAGE SPEC
+//endregion
+
+//region ALTERNATE TEXTURE IMAGE SPEC
+gl.copyTexImage2D = function(target,level,internalformat,x,y,width,height,border){};
+gl.copyTexImage1D = function(target,level,internalformat,x,y,width,border){};
+gl.copyTexSubImage3D = function(target,level,xoffset,yoffset,zoffset,x,y,width,height){};
+gl.copyTexSubImage2D = function(target,level,xoffset,yoffset,x,y,width,height){};
+gl.copyTexSubImage1D = function(target,level,xoffset,x,y,width){};
+//endregio
 
 gl.viewport =
 gl.depthRange =
