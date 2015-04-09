@@ -34,6 +34,271 @@ void removeRef(vector<GLuint> *collection, GLuint obj){
     collection->erase(find(begin(*collection),end(*collection),obj));
 }
 
+const GLfloat* getUniformFloat32ArrayData(Local<Object> value, int lengthExp){
+    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
+        NanThrowTypeError("Array arg not of type Float32Array.");
+    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
+        stringstream ss;
+        ss << "Float32Array length must be " << lengthExp << ".";
+        NanThrowError(ss.str().c_str());
+    }
+    return static_cast<const GLfloat*>(value->GetIndexedPropertiesExternalArrayData());
+}
+
+const void* getArrayData(Local<Object> value){
+    if(value->IsNull()){
+        NanThrowError("Array data is null.");
+    }
+    ExternalArrayType type = value->GetIndexedPropertiesExternalArrayDataType();
+    if(type != kExternalByteArray || type != kExternalUnsignedByteArray ||
+       type != kExternalShortArray || type != kExternalUnsignedShortArray ||
+       type != kExternalIntArray || type != kExternalUnsignedIntArray ||
+       type != kExternalFloatArray){
+        NanThrowTypeError("Array type not supported.");
+    }
+    return value->GetIndexedPropertiesExternalArrayData();
+}
+
+/*--------------------------------------------------------------------------------------------*/
+// OPENGL ERRORS
+/*--------------------------------------------------------------------------------------------*/
+
+NAN_METHOD(getError){
+    NanScope();
+    GLenum error = glGetError();
+    NanReturnValue(V8_INT(error));
+}
+
+/*--------------------------------------------------------------------------------------------*/
+// VERTEX ARRAYS
+/*--------------------------------------------------------------------------------------------*/
+
+NAN_METHOD(vertexPointer){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLint size = args[0]->Int32Value();
+    GLenum type = args[1]->Uint32Value();
+    GLsizei stride = args[2]->Uint32Value();
+    const void *pointer = getArrayData(args[3]->ToObject());
+    glVertexPointer(size,type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(normalPointer){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum type = args[0]->Uint32Value();
+    GLsizei stride = args[1]->Int32Value();
+    const void *pointer = getArrayData(args[2]->ToObject());
+    glNormalPointer(type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(colorPointer){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLint size = args[0]->Int32Value();
+    GLenum type = args[1]->Uint32Value();
+    GLsizei stride = args[2]->Uint32Value();
+    const void *pointer = getArrayData(args[3]->ToObject());
+    glColorPointer(size,type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(secondaryColorPointer){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLint size = args[0]->Int32Value();
+    GLenum type = args[1]->Uint32Value();
+    GLsizei stride = args[3]->Uint32Value();
+    const void *pointer = getArrayData(args[4]->ToObject());
+    glSecondaryColorPointer(size,type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(indexPointer){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum type = args[0]->Uint32Value();
+    GLsizei stride = args[1]->Uint32Value();
+    const void *pointer = getArrayData(args[2]->ToObject());
+    glIndexPointer(type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(edgeFlagPointer){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLsizei stride = args[0]->Uint32Value();
+    const void *pointer = getArrayData(args[1]->ToObject());
+    glEdgeFlagPointer(stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(fogCoordPointer){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum type = args[0]->Uint32Value();
+    GLsizei stride = args[1]->Uint32Value();
+    const void *pointer = getArrayData(args[2]->ToObject());
+    glFogCoordPointer(type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texCoordPointer){
+    NanScope();
+    GLint size = args[0]->Int32Value();
+    GLenum type = args[1]->Uint32Value();
+    GLsizei stride = args[2]->Uint32Value();
+    const void *pointer = getArrayData(args[3]->ToObject());
+    glTexCoordPointer(size,type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertexAttribPointer){
+    NanScope();
+    CHECK_ARGS_LEN(6);
+    GLuint index = args[0]->Uint32Value();
+    GLint size = args[1]->Int32Value();
+    GLenum type = args[2]->Uint32Value();
+    GLboolean normalized = static_cast<GLboolean>(args[3]->BooleanValue());
+    GLsizei stride = args[4]->Uint32Value();
+    intptr_t offset = args[5]->Uint32Value();
+    glVertexAttribPointer(index,size,type,normalized,stride, reinterpret_cast<const GLvoid *>(offset));
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertexAttribIPointer){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLuint index = args[0]->Uint32Value();
+    GLint size = args[1]->Int32Value();
+    GLenum type = args[2]->Uint32Value();
+    GLsizei stride = args[3]->Uint32Value();
+    const void *pointer = getArrayData(args[4]->ToObject());
+    glVertexAttribIPointer(index,size,type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertexAttribLPointer){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLuint index = args[0]->Uint32Value();
+    GLint size = args[1]->Int32Value();
+    GLenum type = args[2]->Uint32Value();
+    GLsizei stride = args[3]->Uint32Value();
+    const void *pointer = getArrayData(args[4]->ToObject());
+    glVertexAttribLPointer(index,size,type,stride,pointer);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(enableClientState){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum array = args[0]->Uint32Value();
+    glEnableClientState(array);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(disableClientState){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum array = args[0]->Uint32Value();
+    glDisableClientState(array);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertexAttribDivisor){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint index = args[0]->Uint32Value();
+    GLuint divisor = args[1]->Uint32Value();
+    glVertexAttribDivisor(index,divisor);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(clientActiveTexture){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum texture = args[0]->Uint32Value();
+    glClientActiveTexture(texture);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(arrayElement){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLint i = args[0]->Int32Value();
+    glArrayElement(i);
+    NanReturnUndefined();
+}
+
+//region DRAWING COMMANDS
+NAN_METHOD(drawArrays){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum mode = args[0]->Uint32Value();
+    GLint first = args[1]->Int32Value();
+    GLsizei count = args[2]->Uint32Value();
+    glDrawArrays(mode, first, count);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(drawArraysInstanced){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLenum mode = args[0]->Uint32Value();
+    GLint first = args[1]->Int32Value();
+    GLsizei count = args[2]->Uint32Value();
+    GLsizei primcount = args[3]->Uint32Value();
+    glDrawArraysInstanced(mode,first,count,primcount);
+    NanReturnUndefined();
+}
+
+//drawArraysIndirect
+//multiDrawArrays
+
+NAN_METHOD(drawElements){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLenum  mode   = args[0]->Uint32Value();
+    GLsizei count  = args[1]->Uint32Value();
+    GLenum  type   = args[2]->Uint32Value();
+    GLvoid *offset = reinterpret_cast<GLvoid*>(args[3]->Uint32Value());
+
+    glDrawElements(mode,count,type,offset);
+    NanReturnUndefined();
+}
+
+//drawElementsInstanced
+//multiDrawElements
+
+NAN_METHOD(drawRangeElements){
+    NanScope();
+    CHECK_ARGS_LEN(6);
+    GLenum  mode   = args[0]->Uint32Value();
+    GLuint  start  = args[1]->Uint32Value();
+    GLuint  end    = args[2]->Uint32Value();
+    GLsizei count  = args[3]->Uint32Value();
+    GLenum  type   = args[4]->Uint32Value();
+    GLvoid *offset = reinterpret_cast<GLvoid*>(args[5]->Uint32Value());
+
+    glDrawRangeElements(mode,start,end,count,type,offset);
+    NanReturnUndefined();
+}
+
+//drawElementsBaseVertex
+//drawRangeElementsBaseVertex
+//drawElementsInstancedBaseVertex
+//drawElementsIndirect
+//multiDrawElementsBaseVertex
+
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// VERTEX SPECIFICATIONS
+/*--------------------------------------------------------------------------------------------*/
+
 /*--------------------------------------------------------------------------------------------*/
 // PER-FRAGMENT OPERATIONS
 /*--------------------------------------------------------------------------------------------*/
@@ -309,17 +574,6 @@ NAN_METHOD(bindAttribLocation) {
 //endregion
 
 //region UNIFORM VARIABLES
-
-const GLfloat* getUniformFloat32ArrayData(Local<Object> value, int lengthExp){
-    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
-        NanThrowTypeError("Array arg not of type Float32Array.");
-    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
-        stringstream ss;
-        ss << "Float32Array length must be " << lengthExp << ".";
-        NanThrowError(ss.str().c_str());
-    }
-    return static_cast<const GLfloat*>(value->GetIndexedPropertiesExternalArrayData());
-}
 
 NAN_METHOD(getUniformLocation){
     NanScope();
@@ -1282,19 +1536,7 @@ NAN_METHOD(enableVertexAttribArray){
 
 
 
-NAN_METHOD(vertexAttribPointer){
-    NanScope();
-    CHECK_ARGS_LEN(6);
-    GLuint index = args[0]->Uint32Value();
-    GLint size = args[1]->Int32Value();
-    GLenum type = args[2]->Uint32Value();
-    GLboolean normalized = static_cast<GLboolean>(args[3]->BooleanValue());
-    GLsizei stride = args[4]->Uint32Value();
-    intptr_t offset = args[5]->Uint32Value();
 
-    glVertexAttribPointer(index,size,type,normalized,stride, reinterpret_cast<const GLvoid *>(offset));
-    NanReturnUndefined();
-}
 
 /*--------------------------------------------------------------------------------------------*/
 // RASTERIZATION
@@ -1464,45 +1706,7 @@ NAN_METHOD(isVertexArray){
 }
 
 
-/*--------------------------------------------------------------------------------------------*/
-// DRAW BUFFER WRITING
-/*--------------------------------------------------------------------------------------------*/
 
-NAN_METHOD(drawArrays){
-    NanScope();
-    CHECK_ARGS_LEN(3);
-    GLenum  mode  = args[0]->Uint32Value();
-    GLint   first = args[1]->Int32Value();
-    GLsizei count = args[2]->Uint32Value();
-    glDrawArrays(mode,first,count);
-    NanReturnUndefined();
-}
-
-NAN_METHOD(drawElements){
-    NanScope();
-    CHECK_ARGS_LEN(4);
-    GLenum  mode   = args[0]->Uint32Value();
-    GLsizei count  = args[1]->Uint32Value();
-    GLenum  type   = args[2]->Uint32Value();
-    GLvoid *offset = reinterpret_cast<GLvoid*>(args[3]->Uint32Value());
-
-    glDrawElements(mode,count,type,offset);
-    NanReturnUndefined();
-}
-
-NAN_METHOD(drawRangeElements){
-    NanScope();
-    CHECK_ARGS_LEN(6);
-    GLenum  mode   = args[0]->Uint32Value();
-    GLuint  start  = args[1]->Uint32Value();
-    GLuint  end    = args[2]->Uint32Value();
-    GLsizei count  = args[3]->Uint32Value();
-    GLenum  type   = args[4]->Uint32Value();
-    GLvoid *offset = reinterpret_cast<GLvoid*>(args[5]->Uint32Value());
-
-    glDrawRangeElements(mode,start,end,count,type,offset);
-    NanReturnUndefined();
-}
 
 
 /*--------------------------------------------------------------------------------------------*/
@@ -1512,6 +1716,51 @@ NAN_METHOD(drawRangeElements){
 #define EXPORT_SET_GL_CONST(name) EXPORT_SET_CONST(#name,GL_ ## name)
 
 void gl::init(Handle<Object> exports) {
+    /*----------------------------------------------------------------------------------------*/
+    // OPENGL ERRORS
+    /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_METHOD(getError);
+
+    /*----------------------------------------------------------------------------------------*/
+    // VERTEX ARRAY
+    /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_METHOD(vertexPointer);
+    EXPORT_SET_METHOD(normalPointer);
+    EXPORT_SET_METHOD(colorPointer);
+    EXPORT_SET_METHOD(secondaryColorPointer);
+    EXPORT_SET_METHOD(indexPointer);
+    EXPORT_SET_METHOD(edgeFlagPointer);
+    EXPORT_SET_METHOD(fogCoordPointer);
+    EXPORT_SET_METHOD(texCoordPointer);
+    EXPORT_SET_METHOD(vertexAttribPointer);
+    EXPORT_SET_METHOD(vertexAttribIPointer);
+    EXPORT_SET_METHOD(vertexAttribLPointer);
+    EXPORT_SET_METHOD(enableClientState);
+    EXPORT_SET_METHOD(disableClientState);
+    EXPORT_SET_METHOD(vertexAttribDivisor);
+    EXPORT_SET_METHOD(clientActiveTexture);
+    EXPORT_SET_METHOD(arrayElement);
+
+    //region DRAWING COMMANDS
+    EXPORT_SET_METHOD(drawArrays);
+    EXPORT_SET_METHOD(drawArraysInstanced);
+    //drawArraysIndirect
+    //multiDrawArrays
+    EXPORT_SET_METHOD(drawElements);
+    //drawElementsInstanced
+    //multiDrawElements
+    EXPORT_SET_METHOD(drawRangeElements);
+    //drawElementsBaseVertex
+    //drawRangeElementsBaseVertex
+    //drawElementsInstancedBaseVertex
+    //drawElementsIndirect
+    //multiDrawElementsBaseVertex
+    //endregion
+
+
+
     EXPORT_SET_GL_CONST(FLOAT);
     EXPORT_SET_GL_CONST(VERTEX_PROGRAM_POINT_SIZE);
 
@@ -1943,7 +2192,5 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_GL_CONST(TRIANGLE_STRIP);
     EXPORT_SET_GL_CONST(TRIANGLE_FAN);
 
-    EXPORT_SET_METHOD(drawArrays);
-    EXPORT_SET_METHOD(drawElements);
-    EXPORT_SET_METHOD(drawRangeElements);
+
 }
