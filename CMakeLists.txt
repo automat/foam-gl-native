@@ -16,5 +16,5 @@ include_directories(${GLEW_INCLUDE_DIRS})
 #v8 node nan
 include_directories(/usr/local/include/node/ node_modules/nan)
 
-set(SOURCE_FILES src/main.cpp src/gl/gl.cpp src/gl/glfw.cpp)
+set(SOURCE_FILES src/main.cpp src/gl/gl.cpp src/gl/glConsts.cpp src/gl/glfw.cpp)
 add_executable(node-foam-gl ${SOURCE_FILES})
