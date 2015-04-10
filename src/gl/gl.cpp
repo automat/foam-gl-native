@@ -10,6 +10,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "glConsts.h"
+
 using namespace std;
 
 /*--------------------------------------------------------------------------------------------*/
@@ -58,6 +60,8 @@ const void* getArrayData(Local<Object> value){
     }
     return value->GetIndexedPropertiesExternalArrayData();
 }
+
+#define EXPORT_SET_GL_CONST(name) EXPORT_SET_CONST(#name,GL_ ## name)
 
 /*--------------------------------------------------------------------------------------------*/
 // OPENGL ERRORS
@@ -1713,8 +1717,6 @@ NAN_METHOD(isVertexArray){
 // EXPORT
 /*--------------------------------------------------------------------------------------------*/
 
-#define EXPORT_SET_GL_CONST(name) EXPORT_SET_CONST(#name,GL_ ## name)
-
 void gl::init(Handle<Object> exports) {
     /*----------------------------------------------------------------------------------------*/
     // OPENGL ERRORS
@@ -2192,5 +2194,9 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_GL_CONST(TRIANGLE_STRIP);
     EXPORT_SET_GL_CONST(TRIANGLE_FAN);
 
+    /*----------------------------------------------------------------------------------------*/
+    // CONSTANTS
+    /*----------------------------------------------------------------------------------------*/
 
+    glConsts::init(exports);
 }
