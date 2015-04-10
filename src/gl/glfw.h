@@ -9,8 +9,4 @@ namespace glfw{
     void init(Handle<Object> exports);
 };
 
-//namespace glfw{
-//    void init(Handle<Object> target);
-//}
-
 #endif //_FOAM_GL_NATIVE_GLFW_H_
