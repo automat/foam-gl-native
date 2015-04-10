@@ -4,6 +4,7 @@
       "sources": [
             "./src/main.cpp",
             "./src/gl/glfw.cpp",
+            "./src/gl/glConsts.cpp",
             "./src/gl/gl.cpp"
       ],
       "conditions": [
