@@ -194,7 +194,7 @@ NAN_METHOD(init_) {
 
     int windowWidth = args[0]->Int32Value();
     int windowHeight = args[1]->Int32Value();
-    const char* windowTitle = *String::Utf8Value(args[2]->ToString());
+    string windowTitle = *String::Utf8Value(args[2]->ToString());
     GLboolean windowIsResizable = static_cast<GLboolean>(args[3]->BooleanValue());
     int numSamples = args[4]->Int32Value();
 
@@ -209,7 +209,7 @@ NAN_METHOD(init_) {
     glfwWindowHint(GLFW_RESIZABLE, windowIsResizable);
     glfwWindowHint(GLFW_SAMPLES, numSamples);
 
-    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowTitle, NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowTitle.c_str(), NULL, NULL);
 
     if(!window){
         glfwTerminate();
