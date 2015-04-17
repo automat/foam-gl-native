@@ -61,8 +61,6 @@ const void* getArrayData(Local<Object> value){
     return value->GetIndexedPropertiesExternalArrayData();
 }
 
-#define EXPORT_SET_GL_CONST(name) EXPORT_SET_CONST(#name,GL_ ## name)
-
 /*--------------------------------------------------------------------------------------------*/
 // OPENGL ERRORS
 /*--------------------------------------------------------------------------------------------*/
@@ -1709,10 +1707,6 @@ NAN_METHOD(isVertexArray){
     NanReturnValue(V8_BOOL(value));
 }
 
-
-
-
-
 /*--------------------------------------------------------------------------------------------*/
 // EXPORT
 /*--------------------------------------------------------------------------------------------*/
@@ -1761,32 +1755,15 @@ void gl::init(Handle<Object> exports) {
     //multiDrawElementsBaseVertex
     //endregion
 
-
-
-    EXPORT_SET_GL_CONST(FLOAT);
-    EXPORT_SET_GL_CONST(VERTEX_PROGRAM_POINT_SIZE);
-
     /*----------------------------------------------------------------------------------------*/
     // PER FRAGMENT OPERATIONS
     /*----------------------------------------------------------------------------------------*/
-
-    EXPORT_SET_GL_CONST(NEVER);
-    EXPORT_SET_GL_CONST(ALWAYS);
-    EXPORT_SET_GL_CONST(LESS);
-    EXPORT_SET_GL_CONST(EQUAL);
-    EXPORT_SET_GL_CONST(LEQUAL);
-    EXPORT_SET_GL_CONST(GREATER);
-    EXPORT_SET_GL_CONST(GEQUAL);
-    EXPORT_SET_GL_CONST(NOTEQUAL);
 
     EXPORT_SET_METHOD(depthFunc);
 
     /*----------------------------------------------------------------------------------------*/
     // SPECIAL FUNCTIONS
     /*----------------------------------------------------------------------------------------*/
-
-    EXPORT_SET_GL_CONST(ARRAY_BUFFER_BINDING);
-    EXPORT_SET_GL_CONST(CURRENT_PROGRAM);
 
     EXPORT_SET_METHOD(disable);
     EXPORT_SET_METHOD(enable);
@@ -1801,42 +1778,9 @@ void gl::init(Handle<Object> exports) {
     // WHOLE FRAMEBUFFER
     /*----------------------------------------------------------------------------------------*/
 
-    EXPORT_SET_GL_CONST(NONE);
-    EXPORT_SET_GL_CONST(FRONT_LEFT);
-    EXPORT_SET_GL_CONST(FRONT_RIGHT);
-    EXPORT_SET_GL_CONST(LEFT);
-    EXPORT_SET_GL_CONST(RIGHT);
-    EXPORT_SET_GL_CONST(BACK_LEFT);
-    EXPORT_SET_GL_CONST(BACK_RIGHT);
-    EXPORT_SET_GL_CONST(FRONT);
-    EXPORT_SET_GL_CONST(BACK);
-    EXPORT_SET_GL_CONST(FRONT_AND_BACK);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT0);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT1);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT2);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT3);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT4);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT5);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT6);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT7);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT8);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT9);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT10);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT11);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT12);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT13);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT14);
-    EXPORT_SET_GL_CONST(COLOR_ATTACHMENT15);
-    EXPORT_SET_GL_CONST(AUX0);
-    EXPORT_SET_GL_CONST(AUX1);
-    EXPORT_SET_GL_CONST(AUX2);
-    EXPORT_SET_GL_CONST(AUX3);
-
     /*----------------------------------------------------------------------------------------*/
     // VIEW & CLIP
     /*----------------------------------------------------------------------------------------*/
-
-    EXPORT_SET_GL_CONST(DEPTH_TEST);
 
     EXPORT_SET_METHOD(viewport);
     EXPORT_SET_METHOD(depthRange);
@@ -1845,11 +1789,6 @@ void gl::init(Handle<Object> exports) {
     /*----------------------------------------------------------------------------------------*/
     // PROGRAMS AND SHADERS
     /*----------------------------------------------------------------------------------------*/
-
-    EXPORT_SET_GL_CONST(VERTEX_SHADER);
-    EXPORT_SET_GL_CONST(FRAGMENT_SHADER);
-    EXPORT_SET_GL_CONST(COMPILE_STATUS);
-    EXPORT_SET_GL_CONST(LINK_STATUS);
 
     //region SHADER OBJECTS
     EXPORT_SET_METHOD(createShader);
@@ -2056,11 +1995,6 @@ void gl::init(Handle<Object> exports) {
     // WHOLE FRAMEBUFFER
     /*----------------------------------------------------------------------------------------*/
 
-    EXPORT_SET_GL_CONST(DEPTH_BUFFER_BIT);
-    EXPORT_SET_GL_CONST(COLOR_BUFFER_BIT);
-    EXPORT_SET_GL_CONST(STENCIL_BUFFER_BIT);
-    EXPORT_SET_GL_CONST(ACCUM_BUFFER_BIT);
-
     //region SELECTING A BUFFER FOR WRITING
     EXPORT_SET_METHOD(drawBuffer);
     //drawBuffers
@@ -2157,14 +2091,6 @@ void gl::init(Handle<Object> exports) {
     // BUFFER
     /*----------------------------------------------------------------------------------------*/
 
-    EXPORT_SET_GL_CONST(ARRAY_BUFFER);
-    EXPORT_SET_GL_CONST(ELEMENT_ARRAY_BUFFER);
-    EXPORT_SET_GL_CONST(STATIC_DRAW);
-    EXPORT_SET_GL_CONST(DYNAMIC_DRAW);
-
-    EXPORT_SET_GL_CONST(BUFFER_SIZE);
-    EXPORT_SET_GL_CONST(BUFFER_USAGE);
-
     EXPORT_SET_METHOD(createBuffer);
     EXPORT_SET_METHOD(bindBuffer);
     EXPORT_SET_METHOD(bufferData);
@@ -2181,18 +2107,6 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_METHOD(deleteVertexArray);
     EXPORT_SET_METHOD(bindVertexArray);
     EXPORT_SET_METHOD(isVertexArray);
-
-    /*----------------------------------------------------------------------------------------*/
-    // DRAW BUFFER WRITING
-    /*----------------------------------------------------------------------------------------*/
-
-    EXPORT_SET_GL_CONST(POINTS);
-    EXPORT_SET_GL_CONST(LINE_STRIP);
-    EXPORT_SET_GL_CONST(LINE_LOOP);
-    EXPORT_SET_GL_CONST(LINES);
-    EXPORT_SET_GL_CONST(TRIANGLES);
-    EXPORT_SET_GL_CONST(TRIANGLE_STRIP);
-    EXPORT_SET_GL_CONST(TRIANGLE_FAN);
 
     /*----------------------------------------------------------------------------------------*/
     // CONSTANTS

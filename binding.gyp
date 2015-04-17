@@ -2,10 +2,10 @@
   "targets": [{
       "target_name": "foam_gl_native",
       "sources": [
-            "./src/main.cpp",
-            "./src/gl/glfw.cpp",
-            "./src/gl/glConsts.cpp",
-            "./src/gl/gl.cpp"
+            "./src/bindings/main.cpp",
+            "./src/bindings/gl/glfw.cpp",
+            "./src/bindings/gl/glConsts.cpp",
+            "./src/bindings/gl/gl.cpp"
       ],
       "conditions": [
             [ 'OS=="mac"', {
