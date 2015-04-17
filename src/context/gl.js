@@ -293,6 +293,42 @@ gl.copyTexSubImage2D = function(target,level,xoffset,yoffset,x,y,width,height){}
 gl.copyTexSubImage1D = function(target,level,xoffset,x,y,width){};
 //endregio
 
+//region COMPRESSED TEXTURE IMAGES
+//endregion
+
+//region MULTISAMPLE TEXTURES
+//endregion
+
+//region BUFFER TEXTURES
+//endregion
+
+//region TEXTURE PARAMETERS
+gl.texParameteri = function(target,pname,params){};
+gl.texParameterf = function(target,pname,params){};
+gl.texParameterfv = function(target,pname,params){};
+gl.texParameteriv = function(target,pname,params){};
+gl.texParameterIiv = function(target,pname,params){};
+gl.texParameterIfv = function(target,pname,params){};
+//endregion
+
+//region TEXTURE MINIFICATION
+gl.generateMipMap = function(target){};
+//endregion
+
+//region TEXTURE ENVIRONMENTS & FUNCTIONS
+gl.texEnvi = function(target,pname,param){};
+gl.texEnvf = function(target,pname,param){};
+gl.texEnviv = function(target,pname,params){};
+gl.texEnvfv = function(target,pname,params){};
+//endregion
+
+//region TEXTURE QUERIES
+gl.isTexture = function(texture){};
+//endregion
+
+//region SAMPLER QUERIES
+//endregion
+
 gl.viewport =
 gl.depthRange =
 gl.scissor = null;

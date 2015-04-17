@@ -1513,9 +1513,163 @@ NAN_METHOD(copyTexSubImage1D){
 }
 //endregion
 
+//region COMPRESSED TEXTURE IMAGES
+//compressedTexImage3D
+//compressedTexImage2D
+//compressedTexImage1D
+//compressedTexSubImage3D
+//compressedTexSubImage2D
+//compressedTexSubImage1D
+//endregion
 
+//region MULTISAMPLE TEXTURES
+//texImage3DMultisample
+//texImage2DMultisample
+//endregion
 
-//    NAN_METHOD(GetAttachedShaders){}
+//region BUFFER TEXTURES
+//texBuffer
+//endregion
+
+//region TEXTURE PARAMETERS
+NAN_METHOD(texParameteri){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    GLint param = args[2]->Int32Value();
+    glTexParameteri(target,pname,param);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texParameterf){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    GLfloat param = static_cast<GLfloat>(args[2]->NumberValue());
+    glTexParameterf(target,pname,param);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texParameterfv){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    const GLfloat *params = reinterpret_cast<const GLfloat*>(getArrayData(args[2]->ToObject()));
+    glTexParameterfv(target,pname,params);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texParameteriv){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+    glTexParameteriv(target,pname,params);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texParameterIiv){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+    glTexParameterIiv(target,pname,params);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texParameterIuiv){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    const GLuint *params = reinterpret_cast<const GLuint *>(getArrayData(args[2]->ToObject()));
+    glTexParameterIuiv(target,pname,params);
+    NanReturnUndefined();
+}
+//endregion
+
+//region TEXTURE MINIFICATION
+NAN_METHOD(generateMipMap){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum target = args[0]->Uint32Value();
+    glGenerateMipmap(target);
+    NanReturnUndefined();
+}
+//endregion
+
+//region TEXTURE ENVIRONMENTS & FUNCTIONS
+NAN_METHOD(texEnvi){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    GLint param = args[2]->Int32Value();
+    glTexEnvi(target,pname,param);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texEnvf){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    GLfloat param = args[2]->Uint32Value();
+    glTexEnvf(target,pname,param);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texEnviv){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+    glTexEnviv(target,pname,params);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texEnvfv){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum target = args[0]->Uint32Value();
+    GLenum pname = args[1]->Uint32Value();
+    const GLfloat *params = reinterpret_cast<const GLfloat *>(getArrayData(args[2]->ToObject()));
+    glTexEnvfv(target,pname,params);
+    NanReturnUndefined();
+}
+//endregion
+
+//region ENUMERATED QUERIES
+//getTexEnv{if}v
+//getTexGen{ifd}v
+//getTexParameter{if}v
+//getTexParameter{i ui}v
+//getTexLevelParameter{if}v
+//endregion
+
+//region TEXTURE QUERIES
+//getTexImage
+//getCompressedTexImage
+NAN_METHOD(isTexture){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint texture = args[0]->Uint32Value();
+    glIsTexture(texture);
+    NanReturnUndefined();
+}
+//endregion
+
+//region SAMPLER QUERIES
+//getSamplerParameter{if}v
+//getSamplerParameterI{i ui}v
+//endregion
+
 
 NAN_METHOD(disableVertexAttribArray){
     NanScope();
@@ -2069,6 +2223,53 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_METHOD(copyTexSubImage3D);
     EXPORT_SET_METHOD(copyTexSubImage2D);
     EXPORT_SET_METHOD(copyTexSubImage1D);
+    //endregion
+
+    //region COMPRESSED TEXTURE IMAGES
+    //compressedTexImage3D
+    //compressedTexImage2D
+    //compressedTexImage1D
+    //compressedTexSubImage3D
+    //compressedTexSubImage2D
+    //compressedTexSubImage1D
+    //endregion
+
+    //region MULTISAMPLE TEXTURES
+    //texImage3DMultisample
+    //texImage2DMultisample
+    //endregion
+
+    //region BUFFER TEXTURES
+    //texBuffer
+    //endregion
+
+    //region TEXTURE PARAMETERS
+    EXPORT_SET_METHOD(texParameteri);
+    EXPORT_SET_METHOD(texParameterf);
+    EXPORT_SET_METHOD(texParameterfv);
+    EXPORT_SET_METHOD(texParameteriv);
+    EXPORT_SET_METHOD(texParameterIiv);
+    EXPORT_SET_METHOD(texParameterIuiv);
+    //endregion
+
+    //region TEXTURE MINIFICATION
+    EXPORT_SET_METHOD(generateMipMap);
+    //endregion
+
+    //region TEXTURE ENVIRONMENTS & FUNCTIONS
+    EXPORT_SET_METHOD(texEnvi);
+    EXPORT_SET_METHOD(texEnvf);
+    EXPORT_SET_METHOD(texEnviv);
+    EXPORT_SET_METHOD(texEnvfv);
+    //endregion
+
+    //region TEXTURE QUERIES
+    //getTexImage
+    //getCompressedTexImage
+    EXPORT_SET_METHOD(isTexture);
+    //endregion
+
+    //region SAMPLER QUERIES
     //endregion
 
 
