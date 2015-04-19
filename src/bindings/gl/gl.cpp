@@ -301,17 +301,6 @@ NAN_METHOD(drawRangeElements){
 // VERTEX SPECIFICATIONS
 /*--------------------------------------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------------------------------*/
-// PER-FRAGMENT OPERATIONS
-/*--------------------------------------------------------------------------------------------*/
-
-NAN_METHOD(depthFunc){
-    NanScope();
-    CHECK_ARGS_LEN(1);
-    GLenum func = args[0]->Uint32Value();
-    glDepthFunc(func);
-    NanReturnUndefined();
-}
 
 /*--------------------------------------------------------------------------------------------*/
 // SPECIAL FUNCTIONS
@@ -398,18 +387,6 @@ NAN_METHOD(depthRange) {
     glDepthRange(
             args[0]->NumberValue(),
             args[1]->NumberValue()
-    );
-    NanReturnUndefined();
-}
-
-NAN_METHOD(scissor) {
-    NanScope();
-    CHECK_ARGS_LEN(4);
-    glScissor(
-            args[0]->Int32Value(),
-            args[1]->Int32Value(),
-            args[2]->Int32Value(),
-            args[3]->Int32Value()
     );
     NanReturnUndefined();
 }
@@ -1670,6 +1647,235 @@ NAN_METHOD(isTexture){
 //getSamplerParameterI{i ui}v
 //endregion
 
+/*--------------------------------------------------------------------------------------------*/
+// PER-FRAGMENT OPERATIONS
+/*--------------------------------------------------------------------------------------------*/
+
+//region SCISSOR TEST
+//scissorArrayv
+//scissorIndexed
+//scissorIndexedv
+NAN_METHOD(scissor) {
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLint left = args[0]->Int32Value();
+    GLint bottom = args[1]->Int32Value();
+    GLsizei width = args[2]->Int32Value();
+    GLsizei height = args[3]->Int32Value();
+    glScissor(left,bottom,width,height);
+    NanReturnUndefined();
+}
+//endregion
+
+//region MULTISAMPLE FRAGMENT OPERATIONS
+NAN_METHOD(sampleCoverage){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLclampf value = static_cast<float>(args[0]->NumberValue());
+    GLboolean invert = static_cast<GLboolean>(args[1]->BooleanValue());
+    glSampleCoverage(value,invert);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(sampleMaski){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint maskNumber = args[0]->Uint32Value();
+    GLbitfield mask = args[1]->Uint32Value();
+    glSampleMaski(maskNumber,mask);
+    NanReturnUndefined();
+}
+//endregion
+
+//region ALPHA TEST
+NAN_METHOD(alphaFunc){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum func = args[0]->Uint32Value();
+    GLclampf ref = static_cast<float>(args[1]->NumberValue());
+    glAlphaFunc(func,ref);
+    NanReturnUndefined();
+}
+//endregion
+
+//region STENCIL TEST
+NAN_METHOD(stencilFunc){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum func = args[0]->Uint32Value();
+    GLint ref = args[1]->Int32Value();
+    GLuint mask = args[2]->Uint32Value();
+    glStencilFunc(func,ref,mask);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(stencilFuncSeparate){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLenum face = args[0]->Uint32Value();
+    GLenum func = args[1]->Uint32Value();
+    GLint ref = args[2]->Int32Value();
+    GLuint mask = args[3]->Uint32Value();
+    glStencilFuncSeparate(face,func,ref,mask);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(stencilOp){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum sfail = args[0]->Uint32Value();
+    GLenum dpfail = args[1]->Uint32Value();
+    GLenum dppass = args[2]->Uint32Value();
+    glStencilOp(sfail,dpfail,dppass);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(stencilOpSeparate){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLenum face = args[0]->Uint32Value();
+    GLenum sfail = args[1]->Uint32Value();
+    GLenum dpfail = args[2]->Uint32Value();
+    GLenum dppass = args[3]->Uint32Value();
+    glStencilOpSeparate(face,sfail,dpfail,dppass);
+    NanReturnUndefined();
+}
+//endregion
+
+//region DEPTH BUFFER TEST
+NAN_METHOD(depthFunc){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum func = args[0]->Uint32Value();
+    glDepthFunc(func);
+    NanReturnUndefined();
+}
+//endregion
+
+//region OCCLUSION QUERIES
+NAN_METHOD(beginQuery){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum target = args[0]->Uint32Value();
+    GLuint id = args[1]->Uint32Value();
+    glBeginQuery(target,id);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(endQuery){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum target = args[0]->Uint32Value();
+    glEndQuery(target);
+    NanReturnUndefined();
+}
+//endregion
+
+//region BLENDING
+NAN_METHOD(blendEquation){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum mode = args[0]->Uint32Value();
+    glBlendEquation(mode);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(blendEquationi){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint buf = args[0]->Uint32Value();
+    GLenum mode = args[1]->Uint32Value();
+    glBlendEquationi(buf,mode);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(blendEquationSeparate){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum modeRGB = args[0]->Uint32Value();
+    GLenum modeAlpha = args[1]->Uint32Value();
+    glBlendEquationSeparate(modeRGB,modeAlpha);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(blendEquationSeparatei){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLuint buf = args[0]->Uint32Value();
+    GLenum modeRGB = args[1]->Uint32Value();
+    GLenum modeAlpha = args[2]->Uint32Value();
+    glBlendEquationSeparatei(buf,modeRGB,modeAlpha);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(blendFunc){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum src = args[0]->Uint32Value();
+    GLenum dst = args[1]->Uint32Value();
+    glBlendFunc(src,dst);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(blendFunci){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLuint buf = args[0]->Uint32Value();
+    GLenum src = args[1]->Uint32Value();
+    GLenum dst = args[2]->Uint32Value();
+    glBlendFunci(buf,src,dst);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(blendFuncSeparate){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLenum srcRGB = args[0]->Uint32Value();
+    GLenum dstRGB = args[1]->Uint32Value();
+    GLenum srcAlpha = args[2]->Uint32Value();
+    GLenum dstAlpha = args[3]->Uint32Value();
+    glBlendFuncSeparate(srcRGB,dstRGB,srcAlpha,dstAlpha);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(blendFuncSeparatei){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLuint buf = args[0]->Uint32Value();
+    GLenum srcRGB = args[1]->Uint32Value();
+    GLenum dstRGB = args[2]->Uint32Value();
+    GLenum srcAlpha = args[3]->Uint32Value();
+    GLenum dstAlpha = args[4]->Uint32Value();
+    glBlendFuncSeparatei(buf,srcRGB,dstRGB,srcAlpha,dstAlpha);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(blendColor){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLclampf red = static_cast<GLclampf>(args[0]->NumberValue());
+    GLclampf green = static_cast<GLclampf>(args[1]->NumberValue());
+    GLclampf blue = static_cast<GLclampf>(args[2]->NumberValue());
+    GLclampf alpha = static_cast<GLclampf>(args[3]->NumberValue());
+    glBlendColor(red,green,blue,alpha);
+    NanReturnUndefined();
+}
+//endregion
+
+//region LOGICAL OPERATION
+NAN_METHOD(logicalOp){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum op = args[0]->Uint32Value();
+    glLogicOp(op);
+    NanReturnUndefined();
+}
+//endregion
+
+/*--------------------------------------------------------------------------------------------*/
+// UNIFORMS AND ATTRIBUTES
+/*--------------------------------------------------------------------------------------------*/
+
 
 NAN_METHOD(disableVertexAttribArray){
     NanScope();
@@ -2270,8 +2476,58 @@ void gl::init(Handle<Object> exports) {
     //endregion
 
     //region SAMPLER QUERIES
+    //getSamplerParameter{if}v
+    //getSamplerParameterI{i ui}v
     //endregion
 
+    /*----------------------------------------------------------------------------------------*/
+    // PER-FRAGMENT OPERATIONS
+    /*----------------------------------------------------------------------------------------*/
+
+    //region SCISSOR TEST
+    //scissorArrayv
+    //scissorIndexed
+    //scissorIndexedv
+    EXPORT_SET_METHOD(scissor);
+    //endregion
+
+    //region MULTISAMPLE FRAGMENT OPERATIONS
+    EXPORT_SET_METHOD(sampleCoverage);
+    EXPORT_SET_METHOD(sampleMaski);
+    //endregion
+
+    //region ALPHA
+    EXPORT_SET_METHOD(alphaFunc);
+    EXPORT_SET_METHOD(stencilFunc);
+    EXPORT_SET_METHOD(stencilFuncSeparate);
+    EXPORT_SET_METHOD(stencilOp);
+    EXPORT_SET_METHOD(stencilOpSeparate);
+    //endregion
+
+    //region DEPTH BUFFER TEST
+    EXPORT_SET_METHOD(depthFunc);
+    //endregion
+
+    //region OCCLUSION QUERIES
+    EXPORT_SET_METHOD(beginQuery);
+    EXPORT_SET_METHOD(endQuery);
+    //endregion
+
+    //region BLENDING
+    EXPORT_SET_METHOD(blendEquation);
+    EXPORT_SET_METHOD(blendEquationi);
+    EXPORT_SET_METHOD(blendEquationSeparate);
+    EXPORT_SET_METHOD(blendEquationSeparatei);
+    EXPORT_SET_METHOD(blendFunc);
+    EXPORT_SET_METHOD(blendFunci);
+    EXPORT_SET_METHOD(blendFuncSeparate);
+    EXPORT_SET_METHOD(blendFuncSeparatei);
+    EXPORT_SET_METHOD(blendColor);
+    //endregion
+
+    //region LOGICAL OPERATION
+    EXPORT_SET_METHOD(logicalOp);
+    //endregion
 
 
 

@@ -40,27 +40,7 @@ gl.drawRangeElements = function(mode,start,end,count,type,indices){};
 // VERTEX SPECIFICATIONS
 /*--------------------------------------------------------------------------------------------*/
 
-
-gl.FLOAT =
-gl.VERTEX_PROGRAM_POINT_SIZE = null;
-
-//PER FRAGMENT OPERATIONS
-
-gl.NEVER =
-gl.ALWAYS =
-gl.LESS =
-gl.EQUAL =
-gl.LEQUAL =
-gl.GREATER =
-gl.GEQUAL =
-gl.NOTEQUAL = null;
-
-gl.depthFunc = null;
-
-//SPECIAL FUNCTIONS
-
-gl.ARRAY_BUFFER_BINDING =
-gl.CURRENT_PROGRAM = null;
+//
 
 gl.disable =
 gl.enable =
@@ -71,12 +51,6 @@ gl.hint =
 gl.isEnabled =
 gl.pixelStorei = null;
 
-//FRAMEBUFFER
-
-gl.COLOR_BUFFER_BIT =
-gl.DEPTH_BUFFER_BIT = null;
-
-gl.DEPTH_TEST = null;
 
 /*--------------------------------------------------------------------------------------------*/
 // PROGRAMS AND SHADERS
@@ -329,14 +303,57 @@ gl.isTexture = function(texture){};
 //region SAMPLER QUERIES
 //endregion
 
-gl.viewport =
-gl.depthRange =
-gl.scissor = null;
+/*--------------------------------------------------------------------------------------------*/
+// PER-FRAGMENT OPERATIONS
+/*--------------------------------------------------------------------------------------------*/
 
-gl.VERTEX_SHADER =
-gl.FRAGMENT_SHADER =
-gl.COMPILE_STATUS =
-gl.LINK_STATUS = null;
+//region SCISSOR TEST
+gl.scissor = function(left,bottom,width,height){};
+//endregion
+
+//region MULTISAMPLE FRAGMENT OPERATIONS
+gl.sampleCoverage = function(value,invert){};
+gl.sampleMaski = function(maskNumber,mask){};
+//endregion
+
+//region ALPHA TEST
+gl.alphaFunc = function(func,ref){};
+//endregion
+
+//region STENCIL TEST
+gl.stencilFunc = function(func,ref,mask){};
+gl.stencilFuncSeparate = function(face,func,ref,mask){};
+gl.stencilOp = function(sfail,dpfail,dppass){};
+gl.stencilOpSeparate = function(face,sfail,dpfail,dppass){};
+//endregion
+
+//region DEPTH BUFFER TESTING
+gl.depthFunc = function(func){};
+//endregion
+
+//region OCCLUSSION QUERIES
+gl.beginQuery = function(target,id){};
+gl.endQuery = function(target){};
+//endregion
+
+//region BLENDING
+gl.blendEquation = function(mode){};
+gl.blendEquationi = function(buf,mode){};
+gl.blendEquationSeparate = function(modeRGB,modeAlpha){};
+gl.blendEquationSeparatei = function(buf,modeRGB,modeAlpha){};
+gl.blendFunc = function(src,dst){};
+gl.blendFunci = function(buf,src,dst){};
+gl.blendFuncSeparate = function(srcRGB,dstRGB,srcAlpha,dstAlpha){};
+gl.blendFuncSeparatei = function(buf,srcRGB,dstRGB,srcAlpha,dstAlpha){};
+gl.blendColor = function(red,green,blue,alpha){};
+//endregion
+
+//region LOGICAL OPERATION
+gl.logicalOp = function(op){};
+//endregion
+
+gl.viewport =
+gl.depthRange = null;
 
 //fragment shaders
 
@@ -351,13 +368,6 @@ gl.enableVertexAttribArray =
 gl.vertexAttribPointer = null;
 
 //BUFFER
-
-gl.ARRAY_BUFFER =
-gl.ELEMENT_ARRAY_BUFFER =
-gl.STATIC_DRAW =
-gl.DYNAMIC_DRAW =
-gl.BUFFER_SIZE =
-gl.BUFFER_USAGE = null;
 
 gl.createBuffer =
 gl.bindBuffer =
@@ -375,17 +385,9 @@ gl.deleteVertexArray =
 gl.bindVertexArray =
 gl.isVertexArray = null;
 
-//DRAW BUFFER WRITING
-gl.POINTS =
-gl.LINE_STRIP =
-gl.LINE_LOOP =
-gl.LINES =
-gl.TRIANGLES =
-gl.TRIANGLE_STRIP =
-gl.TRIANGLE_FAN = null;
-
-
-//
+/*--------------------------------------------------------------------------------------------*/
+// CONSTANTS
+/*--------------------------------------------------------------------------------------------*/
 
 gl.ZERO =
 gl.FALSE =
