@@ -1,4 +1,6 @@
 #include "gl.h"
+#include "../utils/utils.h"
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <node.h>
@@ -59,6 +61,22 @@ const void* getArrayData(Local<Object> value){
         NanThrowTypeError("Array type not supported.");
     }
     return value->GetIndexedPropertiesExternalArrayData();
+}
+
+const GLfloat* getFloat32ArrayData(Local<Object> value, int expLen = -1){
+    if(value->IsNull()){
+        NanThrowError("Array data is null.");
+    }
+    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
+        NanThrowTypeError("Object is not of type Float32Array.");
+    }
+    int len = value->GetIndexedPropertiesExternalArrayDataLength();
+    if(expLen > 0 && expLen != len){
+        stringstream ss;
+        ss << "Float32Array length should be " << expLen << " not " << len << ".";
+        NanThrowRangeError(ss.str().c_str());
+    }
+    return reinterpret_cast<const GLfloat *>(value->GetIndexedPropertiesExternalArrayData());
 }
 
 /*--------------------------------------------------------------------------------------------*/
@@ -298,9 +316,393 @@ NAN_METHOD(drawRangeElements){
 //endregion
 
 /*--------------------------------------------------------------------------------------------*/
-// VERTEX SPECIFICATIONS
+// VERTEX SPECIFICATION – (use buffers, this is just for completeness)
 /*--------------------------------------------------------------------------------------------*/
 
+//region BEGIN AND END
+NAN_METHOD(begin){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum mode = args[0]->Uint32Value();
+    glBegin(mode);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(end){
+    NanScope();
+    glEnd();
+    NanReturnUndefined();
+}
+
+NAN_METHOD(patchParameteri){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum pname = args[0]->Uint32Value();
+    GLint value = args[1]->Int32Value();
+    glPatchParameteri(pname,value);
+    NanReturnUndefined();
+}
+//endregion
+
+//region POLYGON EDGES
+NAN_METHOD(edgeFlag){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLboolean flag = static_cast<GLboolean>(args[0]->BooleanValue());
+    glEdgeFlag(flag);
+    NanReturnUndefined();
+}
+//edgeFlagv
+//endregion
+
+//region VERTEX SPECIFICATION
+NAN_METHOD(vertex2f){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLfloat x = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat y = static_cast<GLfloat>(args[1]->NumberValue());
+    glVertex2f(x,y);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertex3f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLfloat x = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat y = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat z = static_cast<GLfloat>(args[2]->NumberValue());
+    glVertex3f(x,y,z);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertex4f){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLfloat x = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat y = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat z = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat w = static_cast<GLfloat>(args[3]->NumberValue());
+    glVertex4f(x,y,z,w);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertex2fv){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    const GLfloat *coords = getFloat32ArrayData(args[0]->ToObject());
+    glVertex2fv(coords);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertex3fv){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    const GLfloat *coords = getFloat32ArrayData(args[0]->ToObject());
+    glVertex3fv(coords);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertex4fv){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    const GLfloat *coords = getFloat32ArrayData(args[0]->ToObject());
+    glVertex4fv(coords);
+    NanReturnUndefined();
+}
+
+//vertexP{234}ui
+//vertexP{234}uiv
+
+NAN_METHOD(texCoord1f){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLfloat s = static_cast<GLfloat>(args[0]->NumberValue());
+    glTexCoord1f(s);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texCoord2f){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLfloat s = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat t = static_cast<GLfloat>(args[1]->NumberValue());
+    glTexCoord2f(s,t);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texCoord3f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLfloat s = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat t = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat r = static_cast<GLfloat>(args[2]->NumberValue());
+    glTexCoord3f(s,t,r);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texCoord4f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLfloat s = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat t = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat r = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat q = static_cast<GLfloat>(args[3]->NumberValue());
+    glTexCoord4f(s,t,r,q);
+    NanReturnUndefined();
+}
+
+//texCoordP{1234}ui
+//texCoordP{1234}uiv
+
+NAN_METHOD(multiTexCoord1f){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum texture = args[0]->Uint32Value();
+    GLfloat s = static_cast<GLfloat>(args[1]->NumberValue());
+    glMultiTexCoord1f(texture,s);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(multiTexCoord2f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum texture = args[0]->Uint32Value();
+    GLfloat s = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat t = static_cast<GLfloat>(args[2]->NumberValue());
+    glMultiTexCoord2f(texture,s,t);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(multiTexCoord3f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum texture = args[0]->Uint32Value();
+    GLfloat s = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat t = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat r = static_cast<GLfloat>(args[3]->NumberValue());
+    glMultiTexCoord3f(texture,s,t,r);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(multiTexCoord4f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLenum texture = args[0]->Uint32Value();
+    GLfloat s = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat t = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat r = static_cast<GLfloat>(args[3]->NumberValue());
+    GLfloat q = static_cast<GLfloat>(args[4]->NumberValue());
+    glMultiTexCoord4f(texture,s,t,r,q);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(multiTexCoord1fv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum texture = args[0]->Uint32Value();
+    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    glMultiTexCoord1fv(texture,v);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(multiTexCoord2fv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum texture = args[0]->Uint32Value();
+    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    glMultiTexCoord2fv(texture,v);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(multiTexCoord3fv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum texture = args[0]->Uint32Value();
+    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    glMultiTexCoord3fv(texture,v);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(multiTexCoord4fv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum texture = args[0]->Uint32Value();
+    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    glMultiTexCoord4fv(texture,v);
+    NanReturnUndefined();
+}
+
+//multiTexCoordP{1234}ui(
+//multiTexCoordP{1234}uiv
+
+NAN_METHOD(normal3f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLfloat nx = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat ny = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat nz = static_cast<GLfloat>(args[2]->NumberValue());
+    glNormal3f(nx,ny,nz);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(normal3fv){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    glNormal3fv(v);
+    NanReturnUndefined();
+}
+
+//normalP3ui
+//normalP3uiv
+
+NAN_METHOD(fogCoordf){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLfloat coord = static_cast<GLfloat>(args[0]->NumberValue());
+    glFogCoordf(coord);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(fogCoordfv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    const GLfloat *coord = getFloat32ArrayData(args[0]->ToObject());
+    glFogCoordfv(coord);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(color3i){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLint red = args[0]->Int32Value();
+    GLint green = args[1]->Int32Value();
+    GLint blue = args[2]->Int32Value();
+    glColor3i(red,green,blue);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(color4i){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLint red = args[0]->Int32Value();
+    GLint green = args[1]->Int32Value();
+    GLint blue = args[2]->Int32Value();
+    GLint alpha = args[3]->Int32Value();
+    glColor4i(red,green,blue,alpha);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(color3f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLfloat red = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat green = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat blue = static_cast<GLfloat>(args[2]->NumberValue());
+    glColor3f(red,green,blue);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(color4f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLfloat red = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat green = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat blue = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat alpha = static_cast<GLfloat>(args[3]->NumberValue());
+    glColor4f(red,green,blue,alpha);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(color3fv){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    glColor3fv(v);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(color4fv){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    glColor4fv(v);
+    NanReturnUndefined();
+}
+
+//color{34}{bsifd ubusui}
+//colorP{34}ui
+//colorP{34}uiv
+
+NAN_METHOD(secondaryColor3i){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLint red = args[0]->Int32Value();
+    GLint green = args[1]->Int32Value();
+    GLint blue = args[2]->Int32Value();
+    glSecondaryColor3i(red,green,blue);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(secondaryColor3f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLfloat red = static_cast<GLfloat>(args[0]->NumberValue());
+    GLfloat green = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat blue = static_cast<GLfloat>(args[2]->NumberValue());
+    glSecondaryColor3f(red,green,blue);
+    NanReturnUndefined();
+}
+
+//secondaryColor3{bsid ubusui}
+//secondaryColor3{bsifd ubusui}v
+
+//index{sifd ub}
+//index{sifd ub}v
+
+NAN_METHOD(vertexAttrib1f){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint index = args[0]->Uint32Value();
+    GLfloat x = static_cast<GLfloat>(args[1]->NumberValue());
+    glVertexAttrib1f(index,x);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertexAttrib2f){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLuint index = args[0]->Uint32Value();
+    GLfloat x = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat y = static_cast<GLfloat>(args[2]->NumberValue());
+    glVertexAttrib2f(index,x,y);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertexAttrib3f){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLuint index = args[0]->Uint32Value();
+    GLfloat x = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat y = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat z = static_cast<GLfloat>(args[3]->NumberValue());
+    glVertexAttrib3f(index,x,y,z);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(vertexAttrib4f){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLuint index = args[0]->Uint32Value();
+    GLfloat x = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat y = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat z = static_cast<GLfloat>(args[3]->NumberValue());
+    GLfloat w = static_cast<GLfloat>(args[4]->NumberValue());
+    glVertexAttrib4f(index,x,y,z,w);
+    NanReturnUndefined();
+}
+
+//endregion
 
 /*--------------------------------------------------------------------------------------------*/
 // SPECIAL FUNCTIONS
@@ -366,30 +768,62 @@ NAN_METHOD(isEnabled){
 
 
 /*--------------------------------------------------------------------------------------------*/
-// VIEW & CLIP
+// VIEWPORT & CLIPPING
 /*--------------------------------------------------------------------------------------------*/
 
-NAN_METHOD(viewport) {
+//region CONTROLLING VIEWPORT
+//depthRangeArrayv
+NAN_METHOD(depthRangeIndexed){
     NanScope();
-    CHECK_ARGS_LEN(4);
-    glViewport(
-            args[0]->Uint32Value(),
-            args[1]->Uint32Value(),
-            args[2]->Uint32Value(),
-            args[3]->Uint32Value()
-    );
+    CHECK_ARGS_LEN(3);
+    GLuint index = args[0]->Uint32Value();
+    GLclampd n = args[0]->NumberValue();
+    GLclampd f = args[1]->NumberValue();
+    glDepthRangeIndexed(index,n,f);
     NanReturnUndefined();
 }
 
 NAN_METHOD(depthRange) {
     NanScope();
     CHECK_ARGS_LEN(2);
-    glDepthRange(
-            args[0]->NumberValue(),
-            args[1]->NumberValue()
-    );
+    GLclampd n = args[0]->NumberValue();
+    GLclampd f = args[1]->NumberValue();
+    glDepthRange(n,f);
     NanReturnUndefined();
 }
+
+//viewportArrayv
+
+NAN_METHOD(viewportIndexedf){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLuint index = args[0]->Uint32Value();
+    GLfloat x = static_cast<GLfloat>(args[1]->NumberValue());
+    GLfloat y = static_cast<GLfloat>(args[2]->NumberValue());
+    GLfloat w = static_cast<GLfloat>(args[3]->NumberValue());
+    GLfloat h = static_cast<GLfloat>(args[4]->NumberValue());
+    glViewportIndexedf(index,x,y,w,h);
+    NanReturnUndefined();
+}
+
+//viewportIndexedfv
+
+NAN_METHOD(viewport) {
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLint x = args[0]->Int32Value();
+    GLint y = args[1]->Int32Value();
+    GLsizei w = args[2]->Uint32Value();
+    GLsizei h = args[3]->Uint32Value();
+    glViewport(x,y,w,h);
+    NanReturnUndefined();
+}
+//endregion
+
+//region CLIPPING
+//clipPlane
+//getClipPlane
+//endregion
 
 /*--------------------------------------------------------------------------------------------*/
 // SHADERS AND PROGRAMS
@@ -2139,12 +2573,23 @@ void gl::init(Handle<Object> exports) {
     /*----------------------------------------------------------------------------------------*/
 
     /*----------------------------------------------------------------------------------------*/
-    // VIEW & CLIP
+    // VIEWPORT & CLIPPING
     /*----------------------------------------------------------------------------------------*/
 
-    EXPORT_SET_METHOD(viewport);
+    //region CONTROLLING VIEWPORT
+    //depthRangeArrayv
+    EXPORT_SET_METHOD(depthRangeIndexed);
     EXPORT_SET_METHOD(depthRange);
-    EXPORT_SET_METHOD(scissor);
+    //viewportArrayv
+    EXPORT_SET_METHOD(viewportIndexedf);
+    //viewportIndexedfv
+    EXPORT_SET_METHOD(viewport);
+    //endregion
+
+    //region CLIPPING
+    //clipPlane
+    //getClipPlane
+    //endregion
 
     /*----------------------------------------------------------------------------------------*/
     // PROGRAMS AND SHADERS
