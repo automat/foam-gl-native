@@ -51,6 +51,19 @@ gl.hint =
 gl.isEnabled =
 gl.pixelStorei = null;
 
+/*--------------------------------------------------------------------------------------------*/
+// VIEWPORT & CLIPPING
+/*--------------------------------------------------------------------------------------------*/
+
+//region CONTROLLING VIEWPORT
+gl.depthRangeIndexed = function(index,n,f){};
+gl.depthRange = function(n,f){};
+gl.viewportIndexedf = function(index,x,y,w,h){};
+gl.viewport = function(x,y,w,h){};
+//endregion
+
+//region CLIPPING
+//endregion
 
 /*--------------------------------------------------------------------------------------------*/
 // PROGRAMS AND SHADERS
@@ -351,9 +364,6 @@ gl.blendColor = function(red,green,blue,alpha){};
 //region LOGICAL OPERATION
 gl.logicalOp = function(op){};
 //endregion
-
-gl.viewport =
-gl.depthRange = null;
 
 //fragment shaders
 
