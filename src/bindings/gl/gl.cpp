@@ -972,7 +972,23 @@ NAN_METHOD(getAttribLocation){
     NanReturnValue(V8_INT(glGetAttribLocation(program,*name)));
 }
 
-//getActiveAttrib
+NAN_METHOD(getActiveAttrib){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    GLuint index = args[1]->Uint32Value();
+    GLsizei maxLength = 1024;
+    GLsizei length;
+    GLsizei size;
+    GLenum type;
+    char name[maxLength];
+    glGetActiveAttrib(program,index,maxLength,&length,&size,&type,name);
+    Local<Object> out = Object::New();
+    out->Set(V8_STR("size"),V8_INT(size));
+    out->Set(V8_STR("type"),V8_INT(type));
+    out->Set(V8_STR("name"),V8_STR(name));
+    NanReturnValue(out);
+}
 
 NAN_METHOD(bindAttribLocation) {
     NanScope();
@@ -1001,7 +1017,25 @@ NAN_METHOD(getUniformLocation){
 //getActiveUniformBlockiv
 //getUniformIndices
 //getActiveUniformName
-//getActiveUniform
+
+NAN_METHOD(getActiveUniform){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    GLuint index = args[1]->Uint32Value();
+    GLsizei maxLength = 1024;
+    GLsizei length;
+    GLsizei size;
+    GLenum type;
+    char name[maxLength];
+    glGetActiveUniform(program,index,maxLength,&length,&size,&type,name);
+    Local<Object> out = Object::New();
+    out->Set(V8_STR("size"),V8_INT(size));
+    out->Set(V8_STR("type"),V8_INT(type));
+    out->Set(V8_STR("name"),V8_STR(name));
+    NanReturnValue(out);
+}
+
 //getActiveUniformsiv
 
 NAN_METHOD(uniform1f) {
@@ -1403,6 +1437,10 @@ NAN_METHOD(getProgramParameter) {
         case GL_LINK_STATUS:
             glGetProgramiv(program,pname,&params);
             NanReturnValue(V8_BOOL(static_cast<bool>(params)));
+        case GL_ACTIVE_UNIFORMS:
+        case GL_ACTIVE_ATTRIBUTES:
+            glGetProgramiv(program,pname,&params);
+            NanReturnValue(V8_NUM(params));
         default:
             break;
     }
@@ -2621,7 +2659,7 @@ void gl::init(Handle<Object> exports) {
 
     //region VERTEX ATTRIBUTES
     EXPORT_SET_METHOD(getAttribLocation);
-    //getActiveAttrib
+    EXPORT_SET_METHOD(getActiveAttrib);
     EXPORT_SET_METHOD(bindAttribLocation);
     //endregion
 
@@ -2632,7 +2670,7 @@ void gl::init(Handle<Object> exports) {
     //getActiveUniformBlockiv
     //getUniformIndices
     //getActiveUniformName
-    //getActiveUniform
+    EXPORT_SET_METHOD(getActiveUniform);
     //getActiveUniformsiv
     EXPORT_SET_METHOD(uniform1f);
     EXPORT_SET_METHOD(uniform2f);

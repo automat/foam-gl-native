@@ -96,11 +96,13 @@ gl.activeShaderProgram = function(pipeline,program){};
 
 //region VERTEX ATTRIBUTES
 gl.getAttribLocation = function(program,name){};
+gl.getActiveAttrib = function(program,index){};
 gl.bindAttribLocation = function(program,name){};
 //endregion
 
 //region UNIFORM VARIABLES
 gl.getUniformLocation = function(program,name){};
+gl.getActiveUniform = function(program,index){};
 gl.uniform1f = function(location,x){};
 gl.uniform2f = function(location,x,y){};
 gl.uniform3f = function(location,x,y,z){};
