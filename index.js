@@ -1,6 +1,7 @@
 var ContextGLNative_ = require('bindings')('foam_gl_native');
 var glfw = ContextGLNative_.glfw;
 var gl_  = require('./src/context/gl');
+var glDraw_ = require('./src/context/glDraw');
 
 /*---------------------------------------------------------------------------------------------------------*/
 // DEFINES
@@ -110,6 +111,11 @@ ContextGLNative.prototype.getWindowSize = function(){
     return glfw.getWindowSize();
 };
 
+ContextGLNative.prototype.getWindowAspectRatio = function(){
+    var windowSize = this.getWindowSize();
+    return windowSize[0] / windowSize[1];
+}
+
 /**
  * Sets the windows position on screen.
  * @param {Number} x
@@ -194,6 +200,8 @@ ContextGLNative.new = function(obj){
         glfw.swapBuffers();
     }
 
+    contextRef.destroy();
+
     glfw.terminate();
 };
 
@@ -208,6 +216,8 @@ ContextGLNative.prototype.setup = function () {
 ContextGLNative.prototype.update = function () {
     throw new Error('ContextGLNative update not implemented');
 };
+
+ContextGLNative.prototype.destroy = function(){};
 
 /*--------------------------------------------------------------------------------------------*/
 // GL BINDINGS
