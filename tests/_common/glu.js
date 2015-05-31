@@ -1,5 +1,3 @@
-var Matrix44 = require('./Matrix44');
-
 module.exports = {
     perspective: function (m, fov, aspect, near, far) {
         var f = 1.0 / Math.tan(fov * 0.5),
@@ -12,6 +10,7 @@ module.exports = {
         m[10] = (far + near) * nf;
         m[11] = -1;
         m[14] = (2 * far * near) * nf;
+        m[15] = 1;
 
         return m;
 
