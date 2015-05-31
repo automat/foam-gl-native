@@ -290,7 +290,19 @@ NAN_METHOD(drawElements){
     NanReturnUndefined();
 }
 
-//drawElementsInstanced
+NAN_METHOD(drawElementsInstanced){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLenum  mode      = args[0]->Uint32Value();
+    GLsizei count     = args[1]->Uint32Value();
+    GLenum  type      = args[2]->Uint32Value();
+    GLvoid *indices   = reinterpret_cast<GLvoid *>(args[3]->Uint32Value());
+    GLsizei primcount = args[4]->Uint32Value();
+
+    glDrawElementsInstanced(mode,count,type,indices,primcount);
+    NanReturnUndefined();
+}
+
 //multiDrawElements
 
 NAN_METHOD(drawRangeElements){
@@ -2577,7 +2589,7 @@ void gl::init(Handle<Object> exports) {
     //drawArraysIndirect
     //multiDrawArrays
     EXPORT_SET_METHOD(drawElements);
-    //drawElementsInstanced
+    EXPORT_SET_METHOD(drawElementsInstanced);
     //multiDrawElements
     EXPORT_SET_METHOD(drawRangeElements);
     //drawElementsBaseVertex
