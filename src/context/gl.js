@@ -103,6 +103,7 @@ gl.bindAttribLocation = function(program,name){};
 
 //region UNIFORM VARIABLES
 gl.getUniformLocation = function(program,name){};
+gl.getUniformBlockIndex = function(program,uniformBlockIndex){};
 gl.getActiveUniform = function(program,index){};
 gl.uniform1f = function(location,x){};
 gl.uniform2f = function(location,x,y){};
@@ -118,7 +119,7 @@ gl.uniformMatrix4fv = function(location,transpose,value){};
 //endregion
 
 //region UNIFORM BUFFER OBJECTS BINDING
-//uniformBlockBinding
+gl.uniformBlockBinding = function(program,uniformBlockIndex,uniformBlockBinding){};
 //endregion
 
 //region SUBROUTINE UNIFORM VARIABLES
