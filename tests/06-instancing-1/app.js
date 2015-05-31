@@ -13,10 +13,11 @@ var VERT_SRC =
     "layout(location = 0) in vec4 vposition;\n" +
     "layout(location = 1) in vec4 vcolor;\n" +
     "layout(location = 2) in vec3 voffset;\n" + // the per instance offset
+    "layout(location = 3) in float vscale;\n" +
     "out vec4 fcolor;\n" +
     "void main() {\n" +
     "   fcolor = vcolor;\n" +
-    "   gl_Position = ViewProjection*(vposition + vec4(voffset, 0));\n" +
+    "   gl_Position = ViewProjection*(vposition * vscale + vec4(voffset, 0));\n" +
     "}\n";
 
 var FRAG_SRC =
@@ -114,22 +115,44 @@ function setup(){
     this._tbo = gl.createBuffer(gl.ARRAY_BUFFER);
     gl.bindBuffer(gl.ARRAY_BUFFER,this._tbo);
 
-    var translationData = new Float32Array([
-        2.0, 2.0, 2.0,  // cube 0
-        2.0, 2.0,-2.0,  // cube 1
-        2.0,-2.0, 2.0,  // cube 2
-        2.0,-2.0,-2.0,  // cube 3
-        -2.0, 2.0, 2.0,  // cube 4
-        -2.0, 2.0,-2.0,  // cube 5
-        -2.0,-2.0, 2.0,  // cube 6
-        -2.0,-2.0,-2.0,  // cube 7
-    ]);
+
+    var size = 50;
+    var numElements = this._numElements = size * size * size;
+
+    var translationData = new Float32Array(numElements * 3);
+    var scaleData       = new Float32Array(numElements);
+
+
+    for(var i = 0, j, k, index; i < size; ++i){
+        for(j = 0; j < size; ++j){
+            for(k = 0; k < size; ++k){
+                index  = (i * size * size + j * size + k)
+
+                translationData[index * 3    ] = -0.5 + i / size;
+                translationData[index * 3 + 1] = -0.5 + j / size;
+                translationData[index * 3 + 2] = -0.5 + k / size;
+
+                scaleData[index] = 0.00125;
+            }
+        }
+    }
 
     gl.bufferData(gl.ARRAY_BUFFER, translationData, gl.STATIC_DRAW);
 
     gl.enableVertexAttribArray(2);
     gl.vertexAttribPointer(2,3,gl.FLOAT, false, 0, 0);
     gl.vertexAttribDivisor(2,1);
+
+
+    this._sbo = gl.createBuffer(gl.ARRAY_BUFFER);
+    gl.bindBuffer(gl.ARRAY_BUFFER,this._sbo);
+    gl.bufferData(gl.ARRAY_BUFFER, scaleData, gl.STATIC_DRAW);
+
+    gl.enableVertexAttribArray(3);
+    gl.vertexAttribPointer(3,1,gl.FLOAT, false, 0, 0);
+    gl.vertexAttribDivisor(3,1);
+
+
 
     gl.useProgram(this._program);
     gl.bindVertexArray(this._vao);
@@ -158,7 +181,7 @@ function update(){
     var t = this.getSecondsElapsed();
     var d = 2.25 + (0.5 + Math.sin(t) * 0.5) * 7.75;
 
-    glu.lookAt(matrixView.m,Math.cos(t) * d, Math.sin(t * 0.125) * 1.25,Math.sin(t) * d, 0,0,0, 0,1,0);
+    glu.lookAt(matrixView.m,Math.cos(t) * d, Math.sin(t * 0.25) * 5.0,Math.sin(t) * d, 0,0,0, 0,1,0);
     matrixView.multiplied(matrixProjection,matrixProjectionView);
     matrixTemp.set(matrixProjectionView.m);
 
@@ -168,7 +191,7 @@ function update(){
 
     //gl.drawElements(gl.TRIANGLES, 6 * 6, gl.UNSIGNED_SHORT, 0);
 
-    gl.drawElementsInstanced(gl.TRIANGLES, 6 * 6, gl.UNSIGNED_SHORT, 0, 8);
+    gl.drawElementsInstanced(gl.TRIANGLES, 6 * 6, gl.UNSIGNED_SHORT, 0, this._numElements);
 }
 
 Context.new({setup:setup,update:update});
