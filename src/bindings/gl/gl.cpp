@@ -2413,15 +2413,15 @@ NAN_METHOD(bufferData) {
         switch (type){
             case kExternalByteArray:
             case kExternalUnsignedByteArray:
-//                size = 1;
-//                size = obj->GetIndexedPropertiesExternalArrayDataLength() * size;
-//                glBufferData(target, size, static_cast<const GLbyte*>(obj->GetIndexedPropertiesExternalArrayData()), usage);
+                size = 1;
+                size = obj->GetIndexedPropertiesExternalArrayDataLength() * size;
+                glBufferData(target, size, static_cast<const GLbyte*>(obj->GetIndexedPropertiesExternalArrayData()), usage);
                 break;
             case kExternalShortArray:
             case kExternalUnsignedShortArray:
-//                size = 2;
-//                size = obj->GetIndexedPropertiesExternalArrayDataLength() * size;
-//                glBufferData(target, size, static_cast<const GLSh*>(obj->GetIndexedPropertiesExternalArrayData()), usage);
+                size = 2;
+                size = obj->GetIndexedPropertiesExternalArrayDataLength() * size;
+                glBufferData(target, size, static_cast<const GLshort *>(obj->GetIndexedPropertiesExternalArrayData()), usage);
                 break;
             case kExternalIntArray:
                 size = 4;
