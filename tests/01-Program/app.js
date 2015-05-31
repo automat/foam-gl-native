@@ -6,6 +6,7 @@ var gl = Context.gl;
 
 var glu = require('../_common/glu');
 var Matrix44 = require('../_common/Matrix44');
+var Program = require('../_common/Program');
 
 function initProgram(){
     var vertexShader, fragmentShader, program;
@@ -35,6 +36,7 @@ function initProgram(){
     program = gl.createProgram();
     gl.attachShader(program,vertexShader);
     gl.attachShader(program,fragmentShader);
+    gl.bindFragDataLocation(program,0,'outColor');
     gl.linkProgram(program);
 
     if(!gl.getProgramParameter(program,gl.LINK_STATUS)){
@@ -48,43 +50,59 @@ function setup(){
     this.initWindow(800,600,'ContextGLNative');
 
     var width, height;
-    var program, buffer;
+    var program;
 
     width  = this.getWindowSize()[0];
     height = this.getWindowSize()[1];
 
-    program = this._program = initProgram();
-    gl.useProgram(program);
-    gl.enable(gl.VERTEX_PROGRAM_POINT_SIZE);
-    gl.enable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LESS);
-
-
-    this._locationAttribPosition = gl.getAttribLocation(program,'vp');
-    gl.enableVertexAttribArray(this._locationAttribPosition);
-
-    buffer = this._buffer =  gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-    gl.bufferData(gl.ARRAY_BUFFER,
-        new Float32Array([
-            0.0,  0.5,  0.0,
-            0.5, -0.5,  0.0,
-            -0.5,-0.5,  0.0
-        ]),
-        gl.STATIC_DRAW
+    program = new Program();
+    program.load(
+        fs.readFileSync(path.join(__dirname,'vert.glsl'),{encoding:'utf8'}),
+        fs.readFileSync(path.join(__dirname,'frag.glsl'),{encoding:'utf8'})
     );
+
+
+
+    //var width, height;
+    //var program, buffer;
+    //
+    //width  = this.getWindowSize()[0];
+    //height = this.getWindowSize()[1];
+    //
+    //program = this._program = initProgram();
+    //gl.useProgram(program);
+    //gl.enable(gl.VERTEX_PROGRAM_POINT_SIZE);
+    //gl.enable(gl.DEPTH_TEST);
+    //gl.depthFunc(gl.LESS);
+    //
+    //this._vao = gl.createVertexArray();
+    //gl.bindVertexArray(this._vao);
+    //
+    //this._locationAttribPosition = gl.getAttribLocation(program,'vp');
+    //gl.enableVertexAttribArray(this._locationAttribPosition);
+    //
+    //buffer = this._buffer =  gl.createBuffer();
+    //gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+    //gl.bufferData(gl.ARRAY_BUFFER,
+    //    new Float32Array([
+    //        0.0,  0.5,  0.0,
+    //        0.5, -0.5,  0.0,
+    //        -0.5,-0.5,  0.0
+    //    ]),
+    //    gl.STATIC_DRAW
+    //);
 
     gl.viewport(0,0,width,height);
 }
 
 function update(){
-    gl.clearColor(0,0,0,1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    gl.useProgram(this._program);
-    gl.bindBuffer(gl.ARRAY_BUFFER,this._buffer);
-    gl.vertexAttribPointer(this._locationAttribPosition,3,gl.FLOAT,false,0,0);
-    gl.drawArrays(gl.TRIANGLES,0,3);
+    //gl.clearColor(0,0,0,1);
+    //gl.clear(gl.COLOR_BUFFER_BIT);
+    //
+    //gl.useProgram(this._program);
+    //gl.bindBuffer(gl.ARRAY_BUFFER,this._buffer);
+    //gl.vertexAttribPointer(this._locationAttribPosition,3,gl.FLOAT,false,0,0);
+    //gl.drawArrays(gl.TRIANGLES,0,3);
 }
 
 Context.new({setup:setup,update:update});
