@@ -33,6 +33,7 @@ gl.arrayElement = function(i){};
 gl.drawArrays = function(mode,first,count){};
 gl.drawArraysInstanced = function(mode,first,count,primcount){};
 gl.drawElements = function(mode,count,type,indices){};
+gl.drawElementsInstanced = function(mode,count,type,indices,primcount){};
 gl.drawRangeElements = function(mode,start,end,count,type,indices){};
 //endregion
 
