@@ -1024,7 +1024,14 @@ NAN_METHOD(getUniformLocation){
     NanReturnValue(V8_INT(glGetUniformLocation(program,*name)));
 }
 
-//getUniformBlockIndex
+NAN_METHOD(getUniformBlockIndex){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint program = args[0]->Uint32Value();
+    String::Utf8Value uniformBlockName(args[1]);
+    NanReturnValue(V8_INT(glGetUniformBlockIndex(program,*uniformBlockName)));
+}
+
 //getActiveUniformBlockName
 //getActiveUniformBlockiv
 //getUniformIndices
@@ -1256,7 +1263,15 @@ NAN_METHOD(uniformMatrix4fv) {
 //endregion
 
 //region UNIFORM BUFFER OBJECTS BINDINGS
-//uniformBlockBinding
+NAN_METHOD(UniformBlockBinding){
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLuint program = args[0]->Uint32Value();
+    GLuint uniformBlockIndex = args[1]->Uint32Value();
+    GLuint uniformBlockBinding = args[2]->Uint32Value();
+    glUniformBlockBinding(program,uniformBlockIndex,uniformBlockBinding);
+    NanReturnUndefined();
+}
 //endregion
 
 //region SUBROUTINE UNIFORM VARIABLES
@@ -2677,7 +2692,7 @@ void gl::init(Handle<Object> exports) {
 
     //region UNIFORM VARIABLES
     EXPORT_SET_METHOD(getUniformLocation);
-    //getUniformBlockIndex
+    EXPORT_SET_METHOD(getUniformBlockIndex);
     //getActiveUniformBlockName
     //getActiveUniformBlockiv
     //getUniformIndices
@@ -2698,7 +2713,7 @@ void gl::init(Handle<Object> exports) {
     //endregion
 
     //region UNIFORM BUFFER OBJECTS BINDINGS
-    //uniformBlockBinding
+    EXPORT_SET_METHOD(UniformBlockBinding);
     //endregion
 
     //region SUBROUTINE UNIFORM VARIABLES
