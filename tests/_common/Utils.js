@@ -1,12 +1,12 @@
 function compileShader(gl,type,strShader){
-    if(type != gl.VERTEX_SHADER && type != gl.FRAGMENT_SHADER){
+    if(type != gl.VERTEX_SHADER && type != gl.FRAGMENT_SHADER && type != gl.GEOMETRY_SHADER){
         throw new Error('Wrong shader type: ' + type + '.');
     }
     var out = gl.createShader(type);
     gl.shaderSource(out,strShader);
     gl.compileShader(out);
     if(!gl.getShaderParameter(out,gl.COMPILE_STATUS)){
-        throw new Error(type == gl.VERTEX_SHADER ? 'VERTEX' : 'FRAGMENT' + ' ' + gl.getShaderInfoLog(out));
+        throw new Error(type == gl.VERTEX_SHADER ? 'VERTEX' : type == gl.FRAGMENT_SHADER ? 'FRAGMENT' : 'GEOMETRY' + ' ' + gl.getShaderInfoLog(out));
     }
     gl.compileShader(out);
     return out;
