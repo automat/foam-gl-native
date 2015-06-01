@@ -2638,8 +2638,8 @@ NAN_METHOD(unmapBuffer){
     NanScope();
     CHECK_ARGS_LEN(1);
     GLenum target = args[0]->Uint32Value();
-    glUnmapBuffer(target);
-    NanReturnUndefined();
+    GLboolean success = glUnmapBuffer(target);
+    NanReturnValue(V8_BOOL(success));
 }
 
 NAN_METHOD(deleteBuffer) {

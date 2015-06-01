@@ -14,6 +14,8 @@ function setup(){
 
     var num = 100;
     var data = new Float32Array(num);
+    var success;
+
     for(var i = 0; i < num; ++i){
         data[i] = i;
     }
@@ -22,18 +24,26 @@ function setup(){
 
     data = gl.mapBuffer(gl.ARRAY_BUFFER,gl.WRITE_ONLY,gl.FLOAT,num);
     for(var i = 0; i < num; ++i){
-        data[i] = num - i;
+        data[i] = num - 1 - i;
     }
-    gl.unmapBuffer(gl.ARRAY_BUFFER);
+    success = gl.unmapBuffer(gl.ARRAY_BUFFER);
+    console.log(success);
 
     data = gl.mapBuffer(gl.ARRAY_BUFFER,gl.READ_ONLY,gl.FLOAT,num);
     console.log(data);
-    gl.unmapBuffer(gl.ARRAY_BUFFER);
+    success = gl.unmapBuffer(gl.ARRAY_BUFFER);
+    console.log(success);
 
     data = gl.mapBufferRange(gl.ARRAY_BUFFER,0,10,gl.MAP_READ_BIT | gl.MAP_WRITE_BIT,gl.FLOAT);
     data[0] = data[4] = data[8] = 1234.567;
     console.log(data);
-    gl.unmapBuffer(gl.ARRAY_BUFFER);
+    success = gl.unmapBuffer(gl.ARRAY_BUFFER);
+    console.log(success);
+
+    data = gl.mapBuffer(gl.ARRAY_BUFFER,gl.READ_ONLY,gl.FLOAT,num);
+    console.log(data);
+    success = gl.unmapBuffer(gl.ARRAY_BUFFER);
+    console.log(success);
 
     gl.deleteBuffer(vbo);
 }
