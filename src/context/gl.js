@@ -383,19 +383,19 @@ gl.logicalOp = function(op){};
 
 gl.disableVertexAttribArray =
 gl.enableVertexAttribArray =
-//gl.uniform1fv =
-//gl.uniform2fv =
-//gl.uniform3fv =
-//gl.uniform4fv =
 gl.vertexAttribPointer = null;
 
 //BUFFER
 
 gl.createBuffer = function(){};
+gl.genBuffers = function(num){};
 gl.bindBuffer = function(target,buffer){};
 gl.bindBufferRange = function(target,index,buffer,offset,size){};
 gl.bufferData = function(target,dataOrSize,usage){};
 gl.bufferSubData = function(target,offset,dataOrSize){};
+gl.mapBuffer = function(target,access,type,numberOfElements){};
+gl.mapBufferRange = function(target,offset,length,access,type){};
+gl.unmapBuffer = function(target){};
 gl.deleteBuffer = function(buffer){};
 gl.getBufferParameter = function(target,pname){};
 gl.isBuffer = function(buffer){};
@@ -403,10 +403,11 @@ gl.isBuffer = function(buffer){};
 
 //VERTEX ARRAY OBJECTS
 
-gl.createVertexArray =
-gl.deleteVertexArray =
-gl.bindVertexArray =
-gl.isVertexArray = null;
+gl.createVertexArray = function(){};
+gl.genVertexArrays = function(num){};
+gl.deleteVertexArray = function(array){};
+gl.bindVertexArray = function(array){};
+gl.isVertexArray = function(array){};
 
 /*--------------------------------------------------------------------------------------------*/
 // CONSTANTS

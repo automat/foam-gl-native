@@ -2457,6 +2457,19 @@ NAN_METHOD(createBuffer){
     NanReturnValue(V8_INT(buffer));
 }
 
+NAN_METHOD(genBuffers){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint num = args[0]->Uint32Value();
+    GLuint buffers[num];
+    glGenBuffers(num,buffers);
+    Local<Array> out = Array::New(num);
+    for(uint32_t i = 0; i < num; ++i){
+        out->Set(i,V8_INT(buffers[i]));
+    }
+    NanReturnValue(out);
+}
+
 NAN_METHOD(bindBuffer) {
     NanScope();
     CHECK_ARGS_LEN(2);
@@ -2526,7 +2539,7 @@ NAN_METHOD(bufferData) {
 
 NAN_METHOD(bufferSubData) {
     NanScope();
-    CHECK_ARGS_LEN(3);
+    CHECK_ARGS_LEN(4);
     GLenum target = args[0]->Uint32Value();
     GLintptr offset = args[1]->Uint32Value();
     Local<Object> obj = Local<Object>::Cast(args[2]);
@@ -2536,6 +2549,96 @@ NAN_METHOD(bufferSubData) {
     void *data = obj->GetIndexedPropertiesExternalArrayData();
 
     glBufferSubData(target, offset, size, data);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(mapBuffer){
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLenum target = args[0]->Uint32Value();
+    GLenum access = args[1]->Uint32Value();
+    GLenum type   = args[2]->Uint32Value();
+    int numberOfElements = args[3]->Int32Value();
+    void *data = glMapBuffer(target,access);
+    Handle<Object> array = Object::New();
+
+    switch (type) {
+        case GL_FLOAT :
+            array->SetIndexedPropertiesToExternalArrayData(
+                    reinterpret_cast<GLfloat *>(data),
+                    kExternalFloatArray,
+                    numberOfElements
+            );
+            break;
+        case GL_UNSIGNED_SHORT:
+            array->SetIndexedPropertiesToExternalArrayData(
+                    reinterpret_cast<GLshort *>(data),
+                    kExternalShortArray,
+                    numberOfElements
+            );
+            break;
+        case GL_UNSIGNED_INT:
+            array->SetIndexedPropertiesToExternalArrayData(
+                    reinterpret_cast<GLint *>(data),
+                    kExternalUnsignedIntArray,
+                    numberOfElements
+            );
+            break;
+        default:
+            NanThrowTypeError("Wrong data type");
+            break;
+    }
+
+    NanReturnValue(array);
+}
+
+NAN_METHOD(mapBufferRange){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLenum target     = args[0]->Uint32Value();
+    GLintptr offset   = args[1]->Uint32Value();
+    GLint length      = args[2]->Uint32Value();
+    GLbitfield access = args[3]->Uint32Value();
+    GLenum type       = args[4]->Uint32Value();
+
+    Handle<Object> array = Object::New();
+    void *data = glMapBufferRange(target,offset,length,access);
+
+    switch (type){
+        case GL_FLOAT:
+            array->SetIndexedPropertiesToExternalArrayData(
+                    reinterpret_cast<GLfloat *>(data),
+                    kExternalFloatArray,
+                    length
+            );
+            break;
+        case GL_UNSIGNED_SHORT:
+            array->SetIndexedPropertiesToExternalArrayData(
+                    reinterpret_cast<GLshort *>(data),
+                    kExternalShortArray,
+                    length
+            );
+            break;
+        case GL_UNSIGNED_INT:
+            array->SetIndexedPropertiesToExternalArrayData(
+                    reinterpret_cast<GLint *>(data),
+                    kExternalUnsignedIntArray,
+                    length
+            );
+            break;
+        default:
+            NanThrowError("Wrong data type");
+            break;
+    }
+
+    NanReturnValue(array);
+}
+
+NAN_METHOD(unmapBuffer){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLenum target = args[0]->Uint32Value();
+    glUnmapBuffer(target);
     NanReturnUndefined();
 }
 
@@ -2593,6 +2696,19 @@ NAN_METHOD(createVertexArray){
     GLuint vao;
     glGenVertexArrays(1,&vao);
     NanReturnValue(V8_INT(vao));
+}
+
+NAN_METHOD(genVertexArrays){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint num = args[0]->Uint32Value();
+    GLuint arrays[num];
+    glGenVertexArrays(num,arrays);
+    Local<Array> out = Array::New(num);
+    for(uint32_t i = 0; i < num; ++i){
+        out->Set(i,V8_INT(arrays[i]));
+    }
+    NanReturnValue(out);
 }
 
 NAN_METHOD(deleteVertexArray){
@@ -3119,10 +3235,14 @@ void gl::init(Handle<Object> exports) {
     /*----------------------------------------------------------------------------------------*/
 
     EXPORT_SET_METHOD(createBuffer);
+    EXPORT_SET_METHOD(genBuffers);
     EXPORT_SET_METHOD(bindBuffer);
     EXPORT_SET_METHOD(bindBufferRange);
     EXPORT_SET_METHOD(bufferData);
     EXPORT_SET_METHOD(bufferSubData);
+    EXPORT_SET_METHOD(mapBuffer);
+    EXPORT_SET_METHOD(mapBufferRange);
+    EXPORT_SET_METHOD(unmapBuffer);
     EXPORT_SET_METHOD(deleteBuffer);
     EXPORT_SET_METHOD(getBufferParameter);
     EXPORT_SET_METHOD(isBuffer);
@@ -3132,6 +3252,7 @@ void gl::init(Handle<Object> exports) {
     /*----------------------------------------------------------------------------------------*/
 
     EXPORT_SET_METHOD(createVertexArray);
+    EXPORT_SET_METHOD(genVertexArrays);
     EXPORT_SET_METHOD(deleteVertexArray);
     EXPORT_SET_METHOD(bindVertexArray);
     EXPORT_SET_METHOD(isVertexArray);
