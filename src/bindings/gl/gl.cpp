@@ -49,6 +49,31 @@ const GLfloat* getUniformFloat32ArrayData(Local<Object> value, int lengthExp){
     return static_cast<const GLfloat*>(value->GetIndexedPropertiesExternalArrayData());
 }
 
+const GLint* getUniformIntArrayData(Local<Object> value, int lengthExp){
+    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalIntArray){
+        NanThrowTypeError("Array arg not of type IntArray.");
+    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
+        stringstream ss;
+        ss << "IntArray length must be " << lengthExp << ".";
+        NanThrowError(ss.str().c_str());
+    }
+    return static_cast<const GLint*>(value->GetIndexedPropertiesExternalArrayData());
+}
+
+//template<typename T,v8::ExternalArrayType C,string S>
+//const T* getUniformArrayData(Local<Object> value, int lengthExp){
+//    if(value->GetIndexedPropertiesExternalArrayDataType() != C){
+//        stringstream ss;
+//        ss << "Array arg not of " << S << ".";
+//        NanThrowTypeError(ss.str().c_str());
+//    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
+//        stringstream ss;
+//        ss << S << " length must be " << lengthExp << ".";
+//        NanThrowError(ss.str().c_str());
+//    }
+//    return static_cast<const T*>(value->GetIndexedPropertiesExternalArrayData());
+//}
+
 const void* getArrayData(Local<Object> value){
     if(value->IsNull()){
         NanThrowError("Array data is null.");
@@ -1149,70 +1174,86 @@ NAN_METHOD(uniform4i) {
     NanReturnUndefined();
 }
 
-//uniform1fv
-//uniform2fv
-//uniform3fv
-//uniform4fv
+NAN_METHOD(uniform1fv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint location = args[0]->Uint32Value();
+    Local<Object> obj = args[2]->ToObject();
+    const GLfloat *value = getUniformFloat32ArrayData(obj, 1);
+    glUniform1fv(location,1,value);
+    NanReturnUndefined();
+}
 
-//NAN_METHOD(uniform1fv) {
-//    NanScope();
-//    CHECK_ARGS_LEN(2);
-//    GLint location = args[0]->Int32Value();
-//
-//
-//    glUniform1fv()
-////    int count = 0;
-////    GLfloat *value = getArrayData<GLfloat>(args[1], &count);
-////
-////    glUniform1fv(
-////            args[0]->Uint32Value(),
-////            count,
-////            value
-////    );
-//    NanReturnUndefined();
-//}
-//
-//NAN_METHOD(uniform2fv) {
-//    NanScope();
-//    CHECK_ARGS_LEN(2);
-//    int count = 0;
-//    GLfloat *value = getArrayData<GLfloat>(args[1], &count);
-//
-//    glUniform2fv(
-//            args[0]->Uint32Value(),
-//            count / 2,
-//            value
-//    );
-//    NanReturnUndefined();
-//}
-//
-//NAN_METHOD(uniform3fv) {
-//    NanScope();
-//    CHECK_ARGS_LEN(2);
-//    int count = 0;
-//    GLfloat *value = getArrayData<GLfloat>(args[1], &count);
-//
-//    glUniform3fv(
-//            args[0]->Uint32Value(),
-//            count / 3,
-//            value
-//    );
-//    NanReturnUndefined();
-//}
-//
-//NAN_METHOD(uniform4fv) {
-//    NanScope();
-//    CHECK_ARGS_LEN(2);
-//    int count = 0;
-//    GLfloat *value = getArrayData<GLfloat>(args[1], &count);
-//
-//    glUniform3fv(
-//            args[0]->Uint32Value(),
-//            count / 4,
-//            value
-//    );
-//    NanReturnUndefined();
-//}
+NAN_METHOD(uniform2fv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint location = args[0]->Uint32Value();
+    Local<Object> obj = args[2]->ToObject();
+    const GLfloat *value = getUniformFloat32ArrayData(obj, 2);
+    glUniform2fv(location,1,value);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform3fv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint location = args[0]->Uint32Value();
+    Local<Object> obj = args[2]->ToObject();
+    const GLfloat *value = getUniformFloat32ArrayData(obj, 3);
+    glUniform3fv(location,1,value);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform4fv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint location = args[0]->Uint32Value();
+    Local<Object> obj = args[2]->ToObject();
+    const GLfloat *value = getUniformFloat32ArrayData(obj,4);
+    glUniform4fv(location,1,value);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform1iv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint location = args[0]->Uint32Value();
+    Local<Object> obj = args[2]->ToObject();
+    const GLint *value = getUniformIntArrayData(obj, 1);
+    glUniform1iv(location,1,value);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform2iv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint location = args[0]->Uint32Value();
+    Local<Object> obj = args[2]->ToObject();
+    const GLint *value = getUniformIntArrayData(obj, 2);
+    glUniform2iv(location,1,value);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform3iv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint location = args[0]->Uint32Value();
+    Local<Object> obj = args[2]->ToObject();
+    const GLint *value = getUniformIntArrayData(obj, 3);
+    glUniform3iv(location,1,value);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform4iv){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLuint location = args[0]->Uint32Value();
+    Local<Object> obj = args[2]->ToObject();
+    const GLint *value = getUniformIntArrayData(obj, 4);
+    glUniform4iv(location,1,value);
+    NanReturnUndefined();
+}
+
 
 NAN_METHOD(uniformMatrix2fv) {
     NanScope();
@@ -1254,8 +1295,6 @@ NAN_METHOD(uniformMatrix4fv) {
     NanReturnUndefined();
 }
 
-//glProgramUniform{1234}{ifd}
-//glProgramUniform{1234}{ifd}v
 //glProgramUniform{1234}ui
 //glProgramUniform{1234}uiv
 //glProgramUniformMatrix{234}{fd}v
@@ -2720,6 +2759,14 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_METHOD(uniform2i);
     EXPORT_SET_METHOD(uniform3i);
     EXPORT_SET_METHOD(uniform4i);
+    EXPORT_SET_METHOD(uniform1fv);
+    EXPORT_SET_METHOD(uniform2fv);
+    EXPORT_SET_METHOD(uniform3fv);
+    EXPORT_SET_METHOD(uniform4fv);
+    EXPORT_SET_METHOD(uniform1iv);
+    EXPORT_SET_METHOD(uniform2iv);
+    EXPORT_SET_METHOD(uniform3iv);
+    EXPORT_SET_METHOD(uniform4iv);
     EXPORT_SET_METHOD(uniformMatrix2fv);
     EXPORT_SET_METHOD(uniformMatrix3fv);
     EXPORT_SET_METHOD(uniformMatrix4fv);
