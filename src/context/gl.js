@@ -383,13 +383,14 @@ gl.vertexAttribPointer = null;
 
 //BUFFER
 
-gl.createBuffer =
-gl.bindBuffer =
-gl.bufferData =
-gl.bufferSubData =
-gl.deleteBuffer =
-gl.getBufferParameter =
-gl.isBuffer = null;
+gl.createBuffer = function(){};
+gl.bindBuffer = function(target,buffer){};
+gl.bindBufferRange = function(target,index,buffer,offset,size){};
+gl.bufferData = function(target,dataOrSize,usage){};
+gl.bufferSubData = function(target,offset,dataOrSize){};
+gl.deleteBuffer = function(buffer){};
+gl.getBufferParameter = function(target,pname){};
+gl.isBuffer = function(buffer){};
 
 
 //VERTEX ARRAY OBJECTS

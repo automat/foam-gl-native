@@ -2425,6 +2425,18 @@ NAN_METHOD(bindBuffer) {
     NanReturnUndefined();
 }
 
+NAN_METHOD(bindBufferRange){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLenum target   = args[0]->Uint32Value();
+    GLuint index    = args[1]->Uint32Value();
+    GLuint buffer   = args[2]->Uint32Value();
+    GLintptr offset = args[3]->Uint32Value();
+    GLsizeiptr size = args[4]->Uint32Value();
+    glBindBufferRange(target,index,buffer,offset,size);
+    NanReturnUndefined();
+}
+
 NAN_METHOD(bufferData) {
     NanScope();
     CHECK_ARGS_LEN(3);
@@ -2475,6 +2487,7 @@ NAN_METHOD(bufferData) {
 
 NAN_METHOD(bufferSubData) {
     NanScope();
+    CHECK_ARGS_LEN(3);
     GLenum target = args[0]->Uint32Value();
     GLintptr offset = args[1]->Uint32Value();
     Local<Object> obj = Local<Object>::Cast(args[2]);
@@ -3060,6 +3073,7 @@ void gl::init(Handle<Object> exports) {
 
     EXPORT_SET_METHOD(createBuffer);
     EXPORT_SET_METHOD(bindBuffer);
+    EXPORT_SET_METHOD(bindBufferRange);
     EXPORT_SET_METHOD(bufferData);
     EXPORT_SET_METHOD(bufferSubData);
     EXPORT_SET_METHOD(deleteBuffer);
