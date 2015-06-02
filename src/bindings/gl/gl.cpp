@@ -2559,8 +2559,15 @@ NAN_METHOD(mapBuffer){
     GLenum access = args[1]->Uint32Value();
     GLenum type   = args[2]->Uint32Value();
     int numberOfElements = args[3]->Int32Value();
+
+    Local<Object> global = Context::GetCurrent()->Global();
+    Local<Value> val     = global->Get(String::New("Float32Array"));
+    Local<Function> f32c = Local<Function>::New(val.As<Function>());
+
+    Local<Value> size = V8_INT(numberOfElements);
+    Local<Object> array = f32c->NewInstance(1,&size);
+
     void *data = glMapBuffer(target,access);
-    Handle<Object> array = Object::New();
 
     switch (type) {
         case GL_FLOAT :
@@ -2601,7 +2608,13 @@ NAN_METHOD(mapBufferRange){
     GLbitfield access = args[3]->Uint32Value();
     GLenum type       = args[4]->Uint32Value();
 
-    Handle<Object> array = Object::New();
+    Local<Object> global = Context::GetCurrent()->Global();
+    Local<Value> val     = global->Get(String::New("Float32Array"));
+    Local<Function> f32c = Local<Function>::New(val.As<Function>());
+
+    Local<Value> size = V8_INT(length);
+    Local<Object> array = f32c->NewInstance(1,&size);
+
     void *data = glMapBufferRange(target,offset,length,access);
 
     switch (type){
