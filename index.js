@@ -225,6 +225,21 @@ ContextGLNative.prototype.destroy = function(){};
 
 ContextGLNative.gl = gl_;
 
+var writeImage = ContextGLNative.gl.writeImage;
+ContextGLNative.gl.writeImage = function(path,xoffset,yoffset,width,height){
+    xoffset = xoffset || 0;
+    yoffset = yoffset || 0;
+
+    //TODO: Fix me
+    var size = glfw.getWindowSize();
+
+    width  = width  || size[0];
+    height = height || size[1];
+
+    writeImage.call(this,path,xoffset,yoffset,width,height);
+};
+
+
 /*--------------------------------------------------------------------------------------------*/
 // EXPORT
 /*--------------------------------------------------------------------------------------------*/
