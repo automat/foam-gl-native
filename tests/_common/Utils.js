@@ -6,7 +6,7 @@ function compileShader(gl,type,strShader){
     gl.shaderSource(out,strShader);
     gl.compileShader(out);
     if(!gl.getShaderParameter(out,gl.COMPILE_STATUS)){
-        throw new Error(type == gl.VERTEX_SHADER ? 'VERTEX' : type == gl.FRAGMENT_SHADER ? 'FRAGMENT' : 'GEOMETRY' + ' ' + gl.getShaderInfoLog(out));
+        throw new Error((type == gl.VERTEX_SHADER ? 'VERTEX' : type == gl.FRAGMENT_SHADER ? 'FRAGMENT' : 'GEOMETRY') + ' ' + gl.getShaderInfoLog(out));
     }
     gl.compileShader(out);
     return out;
@@ -40,8 +40,37 @@ function createProgram(gl,strVertShader,strFragShader,attribLocationsToBind,frag
     return out;
 }
 
+function createProgramv(gl,shaders,attribLocationsToBind,fragDataLocationsToBind){
+    attribLocationsToBind   = attribLocationsToBind   === undefined ? {} : attribLocationsToBind;
+    fragDataLocationsToBind = fragDataLocationsToBind === undefined ? {} : fragDataLocationsToBind;
+
+    var out = gl.createProgram();
+    var numShaders = shaders.length;
+    for(var i = 0, shader; i < numShaders; ++i){
+        shader = shaders[i];
+        gl.attachShader(out,compileShader(gl,shader.type,shader.src));
+    }
+
+    for(var attribLocation in attribLocationsToBind){
+        gl.bindAttribLocation(out,attribLocation[0],attribLocation[1]);
+    }
+
+    for(var fragDataLocations in fragDataLocationsToBind){
+        gl.bindFragDataLocation(out,fragDataLocations[0],fragDataLocations[1]);
+    }
+
+    gl.linkProgram(out);
+
+    if(!gl.getProgramParameter(out,gl.LINK_STATUS)){
+        throw new Error('PROGRAM ' + gl.getProgramInfoLog(out));
+    }
+
+    return out;
+}
+
 
 module.exports = {
     compileShader : compileShader,
-    createProgram : createProgram
+    createProgram : createProgram,
+    createProgramv : createProgramv
 };
