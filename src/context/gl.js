@@ -272,6 +272,7 @@ gl.activeTexture = function(texture){};
 //region TEXTURE_OBJECTS
 gl.bindTexture = function(target,texture){};
 gl.createTexture = function(){};
+gl.genTextures = function(num){};
 gl.deleteTexture = function(texture){};
 //endregion
 
@@ -282,6 +283,9 @@ gl.deleteSampler = function(sampler){};
 //endregion
 
 //region TEXTURE IMAGE SPEC
+gl.texImage3D = function(target,level,internalformat,width,height,depth,border,format,type,data){};
+gl.texImage2D = function(target,level,internalformat,width,height,border,format,type,data){};
+gl.texImage1D = function(target,level,internalformat,width,border,format,type,data){};
 //endregion
 
 //region ALTERNATE TEXTURE IMAGE SPEC
@@ -408,6 +412,13 @@ gl.genVertexArrays = function(num){};
 gl.deleteVertexArray = function(array){};
 gl.bindVertexArray = function(array){};
 gl.isVertexArray = function(array){};
+
+/*--------------------------------------------------------------------------------------------*/
+// SPECIAL
+/*--------------------------------------------------------------------------------------------*/
+
+gl.readImageData = function(path){};
+gl.writeImage = function(path,xoffset,yoffset,width,height){};
 
 /*--------------------------------------------------------------------------------------------*/
 // CONSTANTS

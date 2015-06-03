@@ -11,6 +11,7 @@
 #include <ostream>
 #include <iostream>
 #include <sstream>
+#include <FreeImage.h>
 
 #include "glConsts.h"
 
@@ -58,6 +59,13 @@ const GLint* getUniformIntArrayData(Local<Object> value, int lengthExp){
         NanThrowError(ss.str().c_str());
     }
     return static_cast<const GLint*>(value->GetIndexedPropertiesExternalArrayData());
+}
+
+void *getImageData(Local<Object> value){
+    if(value->IsNull() || !value->IsObject()){
+        NanThrowTypeError("Wrong texture data");
+    }
+    return value->GetIndexedPropertiesExternalArrayData();
 }
 
 //template<typename T,v8::ExternalArrayType C,string S>
@@ -1902,6 +1910,19 @@ NAN_METHOD(createTexture){
     NanReturnValue(V8_INT(texture));
 }
 
+NAN_METHOD(genTextures){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    GLuint num = args[0]->Uint32Value();
+    GLuint textures[num];
+    glGenTextures(num,textures);
+    Local<Array> out = Array::New(num);
+    for(uint32_t i = 0; i < num; ++i){
+        out->Set(i,V8_INT(textures[i]));
+    }
+    NanReturnValue(out);
+}
+
 NAN_METHOD(deleteTexture){
     NanScope();
     CHECK_ARGS_LEN(1);
@@ -1944,9 +1965,54 @@ NAN_METHOD(deleteSampler){
 //endregion
 
 //region TEXTURE IMAGE SPEC
-//texImage3d
-//texImage2d
-//texImage1d
+NAN_METHOD(texImage3D){
+    NanScope();
+    CHECK_ARGS_LEN(10);
+    GLenum target = args[0]->Uint32Value();
+    GLint level   = args[1]->Int32Value();
+    GLint internalformat = args[2]->Int32Value();
+    GLsizei width = args[3]->Uint32Value();
+    GLsizei height = args[4]->Uint32Value();
+    GLsizei depth = args[5]->Uint32Value();
+    GLint border = args[6]->Int32Value();
+    GLenum format = args[7]->Uint32Value();
+    GLenum type = args[8]->Uint32Value();
+    const void *pixels = getImageData(args[9]->ToObject());
+    glTexImage3D(target,level,internalformat,width,height,depth,border,format,type,pixels);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texImage2D){
+    NanScope();
+    CHECK_ARGS_LEN(9);
+    GLenum target = args[0]->Uint32Value();
+    GLint level = args[1]->Int32Value();
+    GLint internalformat = args[2]->Int32Value();
+    GLsizei width = args[3]->Uint32Value();
+    GLsizei height = args[4]->Uint32Value();
+    GLint border = args[5]->Int32Value();
+    GLenum format = args[6]->Uint32Value();
+    GLenum type = args[7]->Uint32Value();
+    const void *pixels = getImageData(args[8]->ToObject());
+    glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(texImage1D){
+    NanScope();
+    CHECK_ARGS_LEN(8);
+    GLenum target = args[0]->Uint32Value();
+    GLint level = args[1]->Int32Value();
+    GLint internalformat = args[2]->Int32Value();
+    GLsizei width = args[3]->Uint32Value();
+    GLint border = args[4]->Int32Value();
+    GLenum format = args[5]->Uint32Value();
+    GLenum type = args[6]->Uint32Value();
+    const void *pixels = getImageData(args[7]->ToObject());
+    glTexImage1D(target,level,internalformat,width,border,format,type,pixels);
+    NanReturnUndefined();
+}
+
 //endregion
 
 //region ALTERNATE TEXTURE IMAGE SPEC
@@ -2748,6 +2814,148 @@ NAN_METHOD(isVertexArray){
 }
 
 /*--------------------------------------------------------------------------------------------*/
+// SPECIAL
+/*--------------------------------------------------------------------------------------------*/
+
+NAN_METHOD(readImageData){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    char *filename = *String::Utf8Value(args[0]->ToString());
+
+    FREE_IMAGE_FORMAT format = FreeImage_GetFileType(filename,0);
+    FIBITMAP *img = FreeImage_Load(format, filename, 0);
+
+    if(!img){
+        NanThrowError("Image path not valid");
+    }
+
+    int width       = FreeImage_GetWidth(img);
+    int height      = FreeImage_GetHeight(img);
+    int numPixels   = width * height;
+    BYTE *bits   = FreeImage_GetBits(img);
+    GLenum glformat = 0;
+
+    FREE_IMAGE_TYPE type = FreeImage_GetImageType(img);
+
+    Local<Object> global  = Context::GetCurrent()->Global();
+    Local<Value> val      = global->Get(String::New("Uint8ClampedArray"));
+    Local<Function> arr_c = Local<Function>::New(val.As<Function>());
+
+    int dataSize;
+    Local<Value> size;
+    Local<Object> array;
+
+    switch (type){
+        case FIT_BITMAP:
+            switch (FreeImage_GetBPP(img)){
+                case 8: {
+                    size  = V8_INT(numPixels);
+                    array = arr_c->NewInstance(1,&size);
+                    array->SetIndexedPropertiesToPixelData(bits,numPixels);
+                    glformat = GL_LUMINANCE;
+                    break;
+                }
+                case 16: {
+                    FIBITMAP *tmp_ = FreeImage_ConvertTo24Bits(img);
+                    FreeImage_Unload(img);
+                    img = tmp_;
+                    bits = FreeImage_GetBits(img);
+                }
+                case 24: {
+                    dataSize = numPixels * 3;
+
+                    uint8_t *data = new uint8_t[dataSize];
+                    RGBTRIPLE *pix = (RGBTRIPLE *) bits;
+                    for (int i = 0, j = 0; i < dataSize; i += 3, ++j) {
+                        data[i    ] = pix[j].rgbtRed;
+                        data[i + 1] = pix[j].rgbtGreen;
+                        data[i + 2] = pix[j].rgbtBlue;
+                    }
+
+                    size = V8_INT(dataSize);
+                    array = arr_c->NewInstance(1, &size);
+                    array->SetIndexedPropertiesToPixelData(data,dataSize);
+                    glformat = GL_RGB;
+
+                    delete [] data;
+                    break;
+                }
+                case 32: {
+                    dataSize = numPixels * 4;
+
+                    uint8_t *data = new uint8_t[dataSize];
+                    RGBQUAD *pix = (RGBQUAD *) bits;
+                    for (int i = 0, j = 0; i < dataSize; i += 4, ++j) {
+                        data[i    ] = pix[j].rgbRed;
+                        data[i + 1] = pix[j].rgbGreen;
+                        data[i + 2] = pix[j].rgbBlue;
+                        data[i + 3] = pix[j].rgbReserved;
+                    }
+
+                    size = V8_INT(dataSize);
+                    array = arr_c->NewInstance(1, &size);
+                    array->SetIndexedPropertiesToPixelData(data, dataSize);
+                    glformat = GL_RGBA;
+
+                    delete [] data;
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+            break;
+        case FIT_UINT16:
+            NanThrowError("FIT_UINT16 Format currently not supported");
+            break;
+        case FIT_FLOAT:
+            NanThrowError("FIT_FLOAT Format currently not supported");
+            break;
+        default:
+            break;
+    }
+
+    FreeImage_Unload(img);
+
+    Local<Object> out = Object::New();
+    out->Set(V8_STR("width"),V8_INT(width));
+    out->Set(V8_STR("height"),V8_INT(height));
+    out->Set(V8_STR("glformat"),V8_INT(glformat));
+    out->Set(V8_STR("data"),array);
+
+    NanReturnValue(out);
+}
+
+NAN_METHOD(writeImage){
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    if(args[0]->IsUndefined()){
+        NanThrowError("No path supplied.");
+    }
+
+    char* path = *String::Utf8Value(args[0]);
+
+    GLuint x = args[1]->Uint32Value();
+    GLuint y = args[2]->Uint32Value();
+    GLuint w = args[3]->Uint32Value();
+    GLuint h = args[4]->Uint32Value();
+
+    GLuint w_ = w - x;
+    GLuint h_ = h - y;
+
+    BYTE *pixels = new BYTE[w_ * h_ * 3];
+    glReadPixels(x,y,w,h,GL_RGB,GL_UNSIGNED_BYTE,pixels);
+
+    FIBITMAP *image = FreeImage_ConvertFromRawBits(pixels,w_,h_,3 * w_, 24, 0x0000FF, 0xFF0000, 0x00FF00,false);
+    FreeImage_Save(FIF_PNG, image, path, 0);
+
+    FreeImage_Unload(image);
+    delete [] pixels;
+
+    NanReturnUndefined();
+}
+
+/*--------------------------------------------------------------------------------------------*/
 // EXPORT
 /*--------------------------------------------------------------------------------------------*/
 
@@ -3100,6 +3308,7 @@ void gl::init(Handle<Object> exports) {
     //region TEXTURE OBJECTS
     EXPORT_SET_METHOD(bindTexture);
     EXPORT_SET_METHOD(createTexture);
+    EXPORT_SET_METHOD(genTextures);
     EXPORT_SET_METHOD(deleteTexture);
     //areTexturesResident
     //prioritizeTextures
@@ -3114,9 +3323,9 @@ void gl::init(Handle<Object> exports) {
     //endregion
 
     //region TEXTURE IMAGE SPEC
-    ///texImage3d
-    //texImage2d
-    //texImage1d
+    EXPORT_SET_METHOD(texImage3D);
+    EXPORT_SET_METHOD(texImage2D);
+    EXPORT_SET_METHOD(texImage1D);
     //endregion
 
     //region ALTERNATE TEXTURE IMAGE SPEC
@@ -3269,6 +3478,13 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_METHOD(deleteVertexArray);
     EXPORT_SET_METHOD(bindVertexArray);
     EXPORT_SET_METHOD(isVertexArray);
+
+    /*----------------------------------------------------------------------------------------*/
+    // SPECIAL
+    /*----------------------------------------------------------------------------------------*/
+
+    EXPORT_SET_METHOD(readImageData);
+    EXPORT_SET_METHOD(writeImage);
 
     /*----------------------------------------------------------------------------------------*/
     // CONSTANTS
