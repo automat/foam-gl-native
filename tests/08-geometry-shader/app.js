@@ -60,18 +60,14 @@ function getGLError(){
 }
 
 function setup(){
-    this.initWindow(800,600);
+    this.initWindow(1920,1024);
 
-    var shaderVert = Utils.compileShader(gl,gl.VERTEX_SHADER,   VERT_SRC);
-    var shaderGeom = Utils.compileShader(gl,gl.GEOMETRY_SHADER, GEOM_SRC);
-    var shaderFrag = Utils.compileShader(gl,gl.FRAGMENT_SHADER, FRAG_SRC);
+    var program = this._program = Utils.createProgramv(gl, [
+        {type : gl.VERTEX_SHADER,   src : VERT_SRC},
+        {type : gl.GEOMETRY_SHADER, src : GEOM_SRC},
+        {type : gl.FRAGMENT_SHADER, src : FRAG_SRC}
+    ]);
 
-    var program = this._program = gl.createProgram();
-    gl.attachShader(program, shaderVert);
-    gl.attachShader(program, shaderGeom);
-    gl.attachShader(program, shaderFrag);
-
-    gl.linkProgram(program);
     gl.useProgram(program);
 
     if(!gl.getProgramParameter(program,gl.LINK_STATUS)){
@@ -89,7 +85,7 @@ function setup(){
     var vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
 
-    var particles = this._particles = 256 * 1024;
+    var particles = this._particles = 128 * 1024;
     var vertexData = new Float32Array(particles * 3);
 
     for(var i = 0; i < particles; ++i){
