@@ -66,20 +66,11 @@ function getGLError(){
 function setup(){
     this.initWindow(800,600);
 
-    var shaderVert = Utils.compileShader(gl,gl.VERTEX_SHADER,   VERT_SRC);
-    var shaderGeom = Utils.compileShader(gl,gl.GEOMETRY_SHADER, GEOM_SRC);
-    var shaderFrag = Utils.compileShader(gl,gl.FRAGMENT_SHADER, FRAG_SRC);
-
-    var program = this._program = gl.createProgram();
-    gl.attachShader(program, shaderVert);
-    gl.attachShader(program, shaderGeom);
-    gl.attachShader(program, shaderFrag);
-
-    gl.linkProgram(program);
-
-    if(!gl.getProgramParameter(program,gl.LINK_STATUS)){
-        throw new Error('PROGRAM ' + gl.getProgramInfoLog(program));
-    }
+    var program = this._program = Utils.createProgramv(gl,[
+        {type : gl.VERTEX_SHADER,   src : VERT_SRC},
+        {type : gl.GEOMETRY_SHADER, src : GEOM_SRC},
+        {type : gl.FRAGMENT_SHADER, src : FRAG_SRC}
+    ]);
 
     gl.useProgram(program);
 
@@ -130,7 +121,6 @@ function setup(){
 
 function update(){
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
 
     var t = this.getSecondsElapsed();
     var particles  = this._particles;
@@ -215,7 +205,6 @@ function update(){
     var currentBuffer = this._currentBuffer;
 
     gl.bindBuffer(gl.ARRAY_BUFFER,vbo[(currentBuffer + numBuffers - 1)%numBuffers]);
-
     var mapped = gl.mapBufferRange(gl.ARRAY_BUFFER,0,vertexData.length,gl.MAP_WRITE_BIT | gl.MAP_INVALIDATE_BUFFER_BIT,gl.FLOAT);
     mapped.set(vertexData);
     gl.unmapBuffer(gl.ARRAY_BUFFER);
@@ -242,7 +231,6 @@ function update(){
     getGLError();
 
     this._currentBuffer = (currentBuffer + 1) % numBuffers;
-
 }
 
 Context.new({setup:setup,update:update});
