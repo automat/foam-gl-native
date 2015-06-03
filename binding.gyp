@@ -20,6 +20,7 @@
       "libraries" : [
             "-lglfw3",
             "-lGLEW",
+            "-lfreeimage",
             "-framework OpenGL"
       ],
       "include_dirs": [
