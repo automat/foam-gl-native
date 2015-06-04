@@ -6,6 +6,8 @@ E X P E R I M E N T A L
     
     brew install glew
     
+    brew install freeimage
+    
     npm install --save nan
     
     "include_dirs" : [
