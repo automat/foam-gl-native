@@ -175,6 +175,34 @@ NAN_METHOD(restoreWindow){
     NanReturnUndefined();
 }
 
+NAN_METHOD(getFrameBufferSize){
+    NanScope();
+    int width, height;
+    glfwGetFramebufferSize(
+            reinterpret_cast<GLFWwindow*>(windowPtr),
+            &width,
+            &height
+    );
+    Local<Array> out = Array::New(2);
+    out->Set(0, V8_NUM(width));
+    out->Set(1, V8_NUM(height));
+    NanReturnValue(out);
+}
+
+NAN_METHOD(getDPI){
+    NanScope();
+    int windowWidth, windowHeight;
+    int frameBufferWidth, frameBufferHeight;
+
+    GLFWwindow* window = reinterpret_cast<GLFWwindow *>(windowPtr);
+    glfwGetWindowSize(window,&windowWidth,&windowHeight);
+    glfwGetFramebufferSize(window,&frameBufferWidth,&frameBufferHeight);
+
+    float dpi = (float)frameBufferWidth / (float)windowWidth;
+
+    NanReturnValue(V8_NUM(dpi));
+}
+
 /*--------------------------------------------------------------------------------------------*/
 // INIT
 /*--------------------------------------------------------------------------------------------*/
@@ -183,12 +211,17 @@ NAN_METHOD(init_) {
     NanScope();
 
     if(initialized){
-        NanReturnValue(V8_NUM(windowPtr));
+        NanThrowError("GLFW already initialized.");
     }
 
-    if(!glfwInit()){
-        return NanThrowError("Failed to initialize GLFW.");
-    }
+    glfwInit();
+    initialized = true;
+
+    NanReturnUndefined();
+}
+
+NAN_METHOD(createWindow){
+    NanScope();
 
     CHECK_ARGS_LEN(5);
 
@@ -244,6 +277,7 @@ NAN_METHOD(testSetup){
 void glfw::init(Handle<Object> exports){
     NODE_SET_METHOD(exports,"init", init_);
     EXPORT_SET_METHOD(terminate);
+    EXPORT_SET_METHOD(createWindow);
 
     EXPORT_SET_METHOD(pollEvents);
     EXPORT_SET_METHOD(swapBuffers);
@@ -260,6 +294,9 @@ void glfw::init(Handle<Object> exports){
     EXPORT_SET_METHOD(getWindowPos);
     EXPORT_SET_METHOD(iconifyWindow);
     EXPORT_SET_METHOD(restoreWindow);
+
+    EXPORT_SET_METHOD(getFrameBufferSize);
+    EXPORT_SET_METHOD(getDPI);
 
     EXPORT_SET_METHOD(getTime);
 

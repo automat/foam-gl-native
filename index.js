@@ -26,6 +26,7 @@ var windowPtr  = null;
  */
 
 function ContextGLNative(){
+    glfw.init();
     this.__secondsElapsed = -1;
 }
 
@@ -52,7 +53,7 @@ ContextGLNative.prototype.initWindow = function(width,height,title,resizable,num
     resizable  = resizable === undefined ? DEFAULT_WINDOW_RESIZABLE : resizable;
     numSamples = numSamples === undefined ? DEFAULT_WINDOW_NUM_SAMPLES : numSamples;
 
-    windowPtr = glfw.init(width, height, title, resizable, numSamples);
+    glfw.createWindow(width,height,title,resizable,numSamples);
 };
 
 /**
@@ -150,6 +151,22 @@ ContextGLNative.prototype.iconifyWindow = function(){
 
 ContextGLNative.prototype.restoreWindow = function() {
     glfw.restoreWindow();
+};
+
+/**
+ * Returns the windows frame buffer size,
+ */
+
+ContextGLNative.prototype.getFrameBufferSize = function(){
+    return glfw.getFrameBufferSize();
+};
+
+/**
+ * Returns the windows current monitor dpi.
+ */
+
+ContextGLNative.prototype.getDPI = function(){
+    return glfw.getDPI();
 };
 
 /**
