@@ -1,12 +1,27 @@
 function compileShader(gl,type,strShader){
-    if(type != gl.VERTEX_SHADER && type != gl.FRAGMENT_SHADER && type != gl.GEOMETRY_SHADER){
+    types = {};
+    types[gl.VERTEX_SHADER] = 'VERTEX_SHADER';
+    types[gl.FRAGMENT_SHADER] = 'FRAGMENT_SHADER';
+    types[gl.GEOMETRY_SHADER] = 'GEOMETRY_SHADER';
+    types[gl.TESS_CONTROL_SHADER] = 'TESS_CONTROL_SHADER';
+    types[gl.TESS_EVALUATION_SHADER] = 'TESS_EVALUATION_SHADER';
+    types[gl.COMPUTE_SHADER] = 'COMPUTE_SHADER';
+    //var types = {
+    //    gl.VERTEX_SHADER          : 'VERTEX_SHADER',
+    //    gl.FRAGMENT_SHADER        : 'FRAGMENT_SHADER',
+    //    gl.GEOMETRY_SHADER        : 'GEOMETRY_SHADER',
+    //    gl.TESS_CONTROL_SHADER    : 'TESS_CONTROL_SHADER',
+    //    gl.TESS_EVALUATION_SHADER : 'TESS_EVALUATION_SHADER',
+    //    gl.COMPUTE_SHADER         : 'COMPUTE_SHADER'
+    //}
+    if(!types[type]){
         throw new Error('Wrong shader type: ' + type + '.');
     }
     var out = gl.createShader(type);
     gl.shaderSource(out,strShader);
     gl.compileShader(out);
     if(!gl.getShaderParameter(out,gl.COMPILE_STATUS)){
-        throw new Error((type == gl.VERTEX_SHADER ? 'VERTEX' : type == gl.FRAGMENT_SHADER ? 'FRAGMENT' : 'GEOMETRY') + ' ' + gl.getShaderInfoLog(out));
+        throw new Error(types[type] + ' ' + gl.getShaderInfoLog(out));
     }
     gl.compileShader(out);
     return out;
