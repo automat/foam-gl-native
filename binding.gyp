@@ -4,6 +4,7 @@
       "sources": [
             "./src/bindings/main.cpp",
             "./src/bindings/gl/glfw.cpp",
+            "./src/bindings/gl/glfwConsts.cpp",
             "./src/bindings/gl/glConsts.cpp",
             "./src/bindings/gl/gl.cpp",
             "./src/bindings/gl/glDraw.cpp"
