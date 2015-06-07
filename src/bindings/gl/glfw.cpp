@@ -5,6 +5,8 @@
 #include "glfw.h"
 #include "../utils/utils.h"
 
+#include "./glfwConsts.h"
+
 using namespace std;
 using namespace glfw;
 
@@ -88,6 +90,14 @@ NAN_METHOD(getCursorPos){
     out->Set(0, V8_NUM(x));
     out->Set(1, V8_NUM(y));
     NanReturnValue(out);
+}
+
+NAN_METHOD(isKeyDown){
+    NanScope();
+    CHECK_ARGS_LEN(1);
+    int key = args[0]->IsString() ? **String::Utf8Value(args[0]->ToString()) : args[0]->Int32Value();
+    int state = glfwGetKey(reinterpret_cast<GLFWwindow *>(windowPtr),key);
+    NanReturnValue(V8_BOOL(state == GLFW_PRESS));
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -285,6 +295,7 @@ void glfw::init(Handle<Object> exports){
 
     EXPORT_SET_METHOD(setCursorPos);
     EXPORT_SET_METHOD(getCursorPos);
+    EXPORT_SET_METHOD(isKeyDown);
 
     EXPORT_SET_METHOD(windowShouldClose);
     EXPORT_SET_METHOD(getScreenSize);
@@ -303,4 +314,6 @@ void glfw::init(Handle<Object> exports){
     EXPORT_SET_METHOD(getVersion);
 
     EXPORT_SET_METHOD(testSetup);
+
+    glfwConsts::init(exports);
 }
