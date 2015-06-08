@@ -10,17 +10,17 @@ using namespace v8;
 using namespace std;
 
 void init(Handle<Object> exports) {
-    Local<Object> glfw = Object::New();
+    Local<Object> glfw = NanNew<Object>();
     glfw::init(glfw);
-    exports->Set(V8_STR("glfw"),glfw);
+    exports->Set(NanNew("glfw"),glfw);
 
-    Local<Object> gl = Object::New();
+    Local<Object> gl = NanNew<Object>();
     gl::init(gl);
-    exports->Set(V8_STR("gl"),gl);
+    exports->Set(NanNew("gl"),gl);
 
-    Local<Object> glDraw = Object::New();
+    Local<Object> glDraw = NanNew<Object>();
     glDraw::init(glDraw);
-    exports->Set(V8_STR("glDraw"),glDraw);
+    exports->Set(NanNew("glDraw"),glDraw);
 }
 
 NODE_MODULE(foam_gl_native, init)

@@ -21,10 +21,6 @@ using namespace std;
 // REFS & UTILITIES
 /*--------------------------------------------------------------------------------------------*/
 
-vector<GLuint> programs;
-vector<GLuint> shaders;
-vector<GLuint> buffers;
-
 map<v8::ExternalArrayType, GLuint> ELEMENT_SIZES_FOR_ARRAY_TYPES{
         {v8::kExternalByteArray, 1},
         {v8::kExternalUnsignedByteArray, 1},
@@ -35,30 +31,131 @@ map<v8::ExternalArrayType, GLuint> ELEMENT_SIZES_FOR_ARRAY_TYPES{
         {v8::kExternalFloatArray, 4}
 };
 
-void removeRef(vector<GLuint> *collection, GLuint obj){
-    collection->erase(find(begin(*collection),end(*collection),obj));
+//const GLfloat* getUniformFloat32ArrayData(Local<Object> value, int lengthExp){
+//    cout << value->GetIndexedPropertiesExternalArrayDataType() << endl;
+//    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
+//        NanThrowTypeError("Array arg not of type Float32Array.");
+//    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
+//        stringstream ss;
+//        ss << "Float32Array length must be " << lengthExp << ".";
+//        NanThrowError(ss.str().c_str());
+//    }
+//    return static_cast<const GLfloat*>(value->GetIndexedPropertiesExternalArrayData());
+//}
+//
+//const GLint* getUniformIntArrayData(Local<Object> value, int lengthExp){
+//    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalIntArray){
+//        NanThrowTypeError("Array arg not of type IntArray.");
+//    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
+//        stringstream ss;
+//        ss << "IntArray length must be " << lengthExp << ".";
+//        NanThrowError(ss.str().c_str());
+//    }
+//    return static_cast<const GLint*>(value->GetIndexedPropertiesExternalArrayData());
+//}
+
+NAN_WEAK_CALLBACK(ExternalCallback) {
+    data.GetValue()->Neuter();
+    delete[] static_cast<char*>(data.GetParameter());
 }
 
-const GLfloat* getUniformFloat32ArrayData(Local<Object> value, int lengthExp){
-    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
-        NanThrowTypeError("Array arg not of type Float32Array.");
-    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
-        stringstream ss;
-        ss << "Float32Array length must be " << lengthExp << ".";
-        NanThrowError(ss.str().c_str());
+template <typename Type>
+Type* getArrayData(Local<Value> arg, int* num = NULL);
+
+template<>
+GLfloat* getArrayData<GLfloat>(Local<Value> arg, int* num) {
+    GLfloat *data=NULL;
+    if(num) *num=0;
+
+    if(!arg->IsNull()) {
+        if(arg->IsArray()) {
+            Local<Array> arr = Local<Array>::Cast(arg);
+            if(num) *num=arr->Length();
+            data = reinterpret_cast<GLfloat*>(arr->GetIndexedPropertiesExternalArrayData());
+        }
+        else if(arg->IsArrayBufferView()) {
+            Local<ArrayBufferView> obj = arg.As<ArrayBufferView>();
+            Local<ArrayBuffer> buffer = obj->Buffer();
+            if (!buffer->IsExternal()) {
+                ArrayBuffer::Contents contents = buffer->Externalize();
+                obj->SetIndexedPropertiesToExternalArrayData(contents.Data(), kExternalFloat32Array, contents.ByteLength() / 4);
+                NanMakeWeakPersistent(buffer, contents.Data(), ExternalCallback);
+            }
+            if(num) *num = obj->GetIndexedPropertiesExternalArrayDataLength();
+            data = reinterpret_cast<GLfloat*>(obj->GetIndexedPropertiesExternalArrayData());
+
+        }
+        else {
+            NanThrowError("Bad array argument");
+            return NULL;
+        }
     }
-    return static_cast<const GLfloat*>(value->GetIndexedPropertiesExternalArrayData());
+
+    return data;
 }
 
-const GLint* getUniformIntArrayData(Local<Object> value, int lengthExp){
-    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalIntArray){
-        NanThrowTypeError("Array arg not of type IntArray.");
-    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
-        stringstream ss;
-        ss << "IntArray length must be " << lengthExp << ".";
-        NanThrowError(ss.str().c_str());
+template<>
+GLint* getArrayData(Local<Value> arg, int* num) {
+    GLint *data=NULL;
+    if(num) *num=0;
+
+    if(!arg->IsNull()) {
+        if(arg->IsArray()) {
+            Local<Array> arr = Local<Array>::Cast(arg);
+            if(num) *num=arr->Length();
+            data = reinterpret_cast<GLint*>(arr->GetIndexedPropertiesExternalArrayData());
+        }
+        else if(arg->IsArrayBufferView()) {
+            Local<ArrayBufferView> obj = arg.As<ArrayBufferView>();
+            Local<ArrayBuffer> buffer = obj->Buffer();
+            if (!buffer->IsExternal()) {
+                ArrayBuffer::Contents contents = buffer->Externalize();
+                obj->SetIndexedPropertiesToExternalArrayData(contents.Data(), kExternalInt32Array, contents.ByteLength() / 4);
+                NanMakeWeakPersistent(buffer, contents.Data(), ExternalCallback);
+            }
+            if(num) *num = obj->GetIndexedPropertiesExternalArrayDataLength();
+            data = reinterpret_cast<GLint*>(obj->GetIndexedPropertiesExternalArrayData());
+
+        }
+        else {
+            NanThrowError("Bad array argument");
+            return NULL;
+        }
     }
-    return static_cast<const GLint*>(value->GetIndexedPropertiesExternalArrayData());
+
+    return data;
+}
+
+template<>
+void* getArrayData<void>(Local<Value> arg, int* num) {
+    void *data=NULL;
+    if(num) *num=0;
+
+    if(!arg->IsNull()) {
+        if(arg->IsArray()) {
+            Local<Array> arr = Local<Array>::Cast(arg);
+            if(num) *num=arr->Length();
+            data = arr->GetIndexedPropertiesExternalArrayData();
+        }
+        else if(arg->IsArrayBufferView()) {
+            Local<ArrayBufferView> obj = arg.As<ArrayBufferView>();
+            Local<ArrayBuffer> buffer = obj->Buffer();
+            if (!buffer->IsExternal()) {
+                ArrayBuffer::Contents contents = buffer->Externalize();
+                obj->SetIndexedPropertiesToExternalArrayData(contents.Data(), kExternalInt32Array, contents.ByteLength() / 4);
+                NanMakeWeakPersistent(buffer, contents.Data(), ExternalCallback);
+            }
+            if(num) *num = obj->GetIndexedPropertiesExternalArrayDataLength();
+            data = obj->GetIndexedPropertiesExternalArrayData();
+
+        }
+        else {
+            NanThrowError("Bad array argument");
+            return NULL;
+        }
+    }
+
+    return data;
 }
 
 void *getImageData(Local<Object> value){
@@ -82,19 +179,19 @@ void *getImageData(Local<Object> value){
 //    return static_cast<const T*>(value->GetIndexedPropertiesExternalArrayData());
 //}
 
-const void* getArrayData(Local<Object> value){
-    if(value->IsNull()){
-        NanThrowError("Array data is null.");
-    }
-    ExternalArrayType type = value->GetIndexedPropertiesExternalArrayDataType();
-    if(type != kExternalByteArray || type != kExternalUnsignedByteArray ||
-       type != kExternalShortArray || type != kExternalUnsignedShortArray ||
-       type != kExternalIntArray || type != kExternalUnsignedIntArray ||
-       type != kExternalFloatArray){
-        NanThrowTypeError("Array type not supported.");
-    }
-    return value->GetIndexedPropertiesExternalArrayData();
-}
+//const void* getArrayData(Local<Object> value){
+//    if(value->IsNull()){
+//        NanThrowError("Array data is null.");
+//    }
+//    ExternalArrayType type = value->GetIndexedPropertiesExternalArrayDataType();
+//    if(type != kExternalByteArray || type != kExternalUnsignedByteArray ||
+//       type != kExternalShortArray || type != kExternalUnsignedShortArray ||
+//       type != kExternalIntArray || type != kExternalUnsignedIntArray ||
+//       type != kExternalFloatArray){
+//        NanThrowTypeError("Array type not supported.");
+//    }
+//    return value->GetIndexedPropertiesExternalArrayData();
+//}
 
 const GLfloat* getFloat32ArrayData(Local<Object> value, int expLen = -1){
     if(value->IsNull()){
@@ -119,7 +216,7 @@ const GLfloat* getFloat32ArrayData(Local<Object> value, int expLen = -1){
 NAN_METHOD(getError){
     NanScope();
     GLenum error = glGetError();
-    NanReturnValue(V8_INT(error));
+    NanReturnValue(NanNew(error));
 }
 
 /*--------------------------------------------------------------------------------------------*/
@@ -132,7 +229,7 @@ NAN_METHOD(vertexPointer){
     GLint size = args[0]->Int32Value();
     GLenum type = args[1]->Uint32Value();
     GLsizei stride = args[2]->Uint32Value();
-    const void *pointer = getArrayData(args[3]->ToObject());
+    const void *pointer = getArrayData<void>(args[3]->ToObject());
     glVertexPointer(size,type,stride,pointer);
     NanReturnUndefined();
 }
@@ -142,7 +239,7 @@ NAN_METHOD(normalPointer){
     CHECK_ARGS_LEN(3);
     GLenum type = args[0]->Uint32Value();
     GLsizei stride = args[1]->Int32Value();
-    const void *pointer = getArrayData(args[2]->ToObject());
+    const void *pointer = getArrayData<void>(args[2]->ToObject());
     glNormalPointer(type,stride,pointer);
     NanReturnUndefined();
 }
@@ -153,7 +250,7 @@ NAN_METHOD(colorPointer){
     GLint size = args[0]->Int32Value();
     GLenum type = args[1]->Uint32Value();
     GLsizei stride = args[2]->Uint32Value();
-    const void *pointer = getArrayData(args[3]->ToObject());
+    const void *pointer = getArrayData<void>(args[3]->ToObject());
     glColorPointer(size,type,stride,pointer);
     NanReturnUndefined();
 }
@@ -164,7 +261,7 @@ NAN_METHOD(secondaryColorPointer){
     GLint size = args[0]->Int32Value();
     GLenum type = args[1]->Uint32Value();
     GLsizei stride = args[3]->Uint32Value();
-    const void *pointer = getArrayData(args[4]->ToObject());
+    const void *pointer = getArrayData<void>(args[4]->ToObject());
     glSecondaryColorPointer(size,type,stride,pointer);
     NanReturnUndefined();
 }
@@ -174,7 +271,7 @@ NAN_METHOD(indexPointer){
     CHECK_ARGS_LEN(3);
     GLenum type = args[0]->Uint32Value();
     GLsizei stride = args[1]->Uint32Value();
-    const void *pointer = getArrayData(args[2]->ToObject());
+    const void *pointer = getArrayData<void>(args[2]->ToObject());
     glIndexPointer(type,stride,pointer);
     NanReturnUndefined();
 }
@@ -183,7 +280,7 @@ NAN_METHOD(edgeFlagPointer){
     NanScope();
     CHECK_ARGS_LEN(2);
     GLsizei stride = args[0]->Uint32Value();
-    const void *pointer = getArrayData(args[1]->ToObject());
+    const void *pointer = getArrayData<void>(args[1]->ToObject());
     glEdgeFlagPointer(stride,pointer);
     NanReturnUndefined();
 }
@@ -193,7 +290,7 @@ NAN_METHOD(fogCoordPointer){
     CHECK_ARGS_LEN(3);
     GLenum type = args[0]->Uint32Value();
     GLsizei stride = args[1]->Uint32Value();
-    const void *pointer = getArrayData(args[2]->ToObject());
+    const void *pointer = getArrayData<void>(args[2]->ToObject());
     glFogCoordPointer(type,stride,pointer);
     NanReturnUndefined();
 }
@@ -203,7 +300,7 @@ NAN_METHOD(texCoordPointer){
     GLint size = args[0]->Int32Value();
     GLenum type = args[1]->Uint32Value();
     GLsizei stride = args[2]->Uint32Value();
-    const void *pointer = getArrayData(args[3]->ToObject());
+    const void *pointer = getArrayData<void>(args[3]->ToObject());
     glTexCoordPointer(size,type,stride,pointer);
     NanReturnUndefined();
 }
@@ -228,7 +325,7 @@ NAN_METHOD(vertexAttribIPointer){
     GLint size = args[1]->Int32Value();
     GLenum type = args[2]->Uint32Value();
     GLsizei stride = args[3]->Uint32Value();
-    const void *pointer = getArrayData(args[4]->ToObject());
+    const void *pointer = getArrayData<void>(args[4]->ToObject());
     glVertexAttribIPointer(index,size,type,stride,pointer);
     NanReturnUndefined();
 }
@@ -240,7 +337,7 @@ NAN_METHOD(vertexAttribLPointer){
     GLint size = args[1]->Int32Value();
     GLenum type = args[2]->Uint32Value();
     GLsizei stride = args[3]->Uint32Value();
-    const void *pointer = getArrayData(args[4]->ToObject());
+    const void *pointer = getArrayData<void>(args[4]->ToObject());
     glVertexAttribLPointer(index,size,type,stride,pointer);
     NanReturnUndefined();
 }
@@ -788,7 +885,7 @@ NAN_METHOD(getParameter){
         case GL_ARRAY_BUFFER_BINDING:
             GLint params;
             glGetIntegerv(pname,&params);
-            NanReturnValue(V8_INT(params));
+            NanReturnValue(NanNew(params));
         default:
             break;
     }
@@ -808,7 +905,7 @@ NAN_METHOD(isEnabled){
     NanScope();
     CHECK_ARGS_LEN(1);
     GLboolean enabled = glIsEnabled(args[0]->Uint32Value());
-    NanReturnValue(V8_BOOL(enabled));
+    NanReturnValue(NanNew(enabled));
 }
 
 
@@ -880,8 +977,7 @@ NAN_METHOD(createShader) {
     NanScope();
     CHECK_ARGS_LEN(1);
     GLuint shader = glCreateShader(args[0]->Uint32Value());
-    shaders.push_back(shader);
-    NanReturnValue(V8_NUM(shader));
+    NanReturnValue(NanNew(shader));
 }
 
 NAN_METHOD(shaderSource) {
@@ -907,7 +1003,6 @@ NAN_METHOD(deleteShader) {
     CHECK_ARGS_LEN(1);
     GLuint shader = args[0]->Uint32Value();
     glDeleteShader(shader);
-    removeRef(&shaders, shader);
     NanReturnUndefined();
 }
 //endregion
@@ -917,8 +1012,7 @@ NAN_METHOD(deleteShader) {
 NAN_METHOD(createProgram) {
     NanScope();
     GLuint program = glCreateProgram();
-    programs.push_back(program);
-    NanReturnValue(V8_NUM(program));
+    NanReturnValue(NanNew(program));
 }
 
 NAN_METHOD(attachShader){
@@ -956,7 +1050,6 @@ NAN_METHOD(deleteProgram) {
     CHECK_ARGS_LEN(1);
     GLuint program = args[0]->Uint32Value();
     glDeleteProgram(program);
-    removeRef(&programs, program);
     NanReturnUndefined();
 }
 //endregion
@@ -967,7 +1060,7 @@ NAN_METHOD(createProgramPipeline){
     NanScope();
     GLuint pipeline;
     glGenProgramPipelines(1,&pipeline);
-    NanReturnValue(V8_INT(pipeline));
+    NanReturnValue(NanNew(pipeline));
 }
 
 NAN_METHOD(deleteProgramPipeline){
@@ -1014,7 +1107,7 @@ NAN_METHOD(getAttribLocation){
     CHECK_ARGS_LEN(2);
     GLuint program = args[0]->Uint32Value();
     String::Utf8Value name(args[1]);
-    NanReturnValue(V8_INT(glGetAttribLocation(program,*name)));
+    NanReturnValue(NanNew(glGetAttribLocation(program,*name)));
 }
 
 NAN_METHOD(getActiveAttrib){
@@ -1028,10 +1121,10 @@ NAN_METHOD(getActiveAttrib){
     GLenum type;
     char name[maxLength];
     glGetActiveAttrib(program,index,maxLength,&length,&size,&type,name);
-    Local<Object> out = Object::New();
-    out->Set(V8_STR("size"),V8_INT(size));
-    out->Set(V8_STR("type"),V8_INT(type));
-    out->Set(V8_STR("name"),V8_STR(name));
+    Local<Object> out = NanNew<Object>();
+    out->Set(NanNew("size"),NanNew(size));
+    out->Set(NanNew("type"),NanNew(type));
+    out->Set(NanNew("name"),NanNew(name));
     NanReturnValue(out);
 }
 
@@ -1054,7 +1147,7 @@ NAN_METHOD(getUniformLocation){
     CHECK_ARGS_LEN(2);
     GLuint program = args[0]->Uint32Value();
     String::Utf8Value name(args[1]);
-    NanReturnValue(V8_INT(glGetUniformLocation(program,*name)));
+    NanReturnValue(NanNew(glGetUniformLocation(program,*name)));
 }
 
 NAN_METHOD(getUniformBlockIndex){
@@ -1062,7 +1155,7 @@ NAN_METHOD(getUniformBlockIndex){
     CHECK_ARGS_LEN(2);
     GLuint program = args[0]->Uint32Value();
     String::Utf8Value uniformBlockName(args[1]);
-    NanReturnValue(V8_INT(glGetUniformBlockIndex(program,*uniformBlockName)));
+    NanReturnValue(NanNew(glGetUniformBlockIndex(program,*uniformBlockName)));
 }
 
 //getActiveUniformBlockName
@@ -1081,10 +1174,10 @@ NAN_METHOD(getActiveUniform){
     GLenum type;
     char name[maxLength];
     glGetActiveUniform(program,index,maxLength,&length,&size,&type,name);
-    Local<Object> out = Object::New();
-    out->Set(V8_STR("size"),V8_INT(size));
-    out->Set(V8_STR("type"),V8_INT(type));
-    out->Set(V8_STR("name"),V8_STR(name));
+    Local<Object> out = NanNew<Object>();
+    out->Set(NanNew("size"),NanNew(size));
+    out->Set(NanNew("type"),NanNew(type));
+    out->Set(NanNew("name"),NanNew(name));
     NanReturnValue(out);
 }
 
@@ -1187,7 +1280,8 @@ NAN_METHOD(uniform1fv){
     CHECK_ARGS_LEN(2);
     GLuint location = args[0]->Uint32Value();
     Local<Object> obj = args[2]->ToObject();
-    const GLfloat *value = getUniformFloat32ArrayData(obj, 1);
+//    const GLfloat *value = getArrayData(obj, 1);
+    const GLfloat *value = getArrayData<GLfloat>(obj);
     glUniform1fv(location,1,value);
     NanReturnUndefined();
 }
@@ -1197,7 +1291,8 @@ NAN_METHOD(uniform2fv){
     CHECK_ARGS_LEN(2);
     GLuint location = args[0]->Uint32Value();
     Local<Object> obj = args[2]->ToObject();
-    const GLfloat *value = getUniformFloat32ArrayData(obj, 2);
+//    const GLfloat *value = getArrayData(obj, 2);
+    const GLfloat *value = getArrayData<GLfloat>(obj);
     glUniform2fv(location,1,value);
     NanReturnUndefined();
 }
@@ -1207,7 +1302,8 @@ NAN_METHOD(uniform3fv){
     CHECK_ARGS_LEN(2);
     GLuint location = args[0]->Uint32Value();
     Local<Object> obj = args[2]->ToObject();
-    const GLfloat *value = getUniformFloat32ArrayData(obj, 3);
+//    const GLfloat *value = getArrayData(obj, 3);
+    const GLfloat *value = getArrayData<GLfloat>(obj);
     glUniform3fv(location,1,value);
     NanReturnUndefined();
 }
@@ -1217,7 +1313,8 @@ NAN_METHOD(uniform4fv){
     CHECK_ARGS_LEN(2);
     GLuint location = args[0]->Uint32Value();
     Local<Object> obj = args[2]->ToObject();
-    const GLfloat *value = getUniformFloat32ArrayData(obj,4);
+//    const GLfloat *value = getArrayData(obj,4);
+    const GLfloat *value = getArrayData<GLfloat>(obj);
     glUniform4fv(location,1,value);
     NanReturnUndefined();
 }
@@ -1227,7 +1324,8 @@ NAN_METHOD(uniform1iv){
     CHECK_ARGS_LEN(2);
     GLuint location = args[0]->Uint32Value();
     Local<Object> obj = args[2]->ToObject();
-    const GLint *value = getUniformIntArrayData(obj, 1);
+//    const GLint *value = getArrayData<GLint>(obj, 1);
+    const GLint *value = getArrayData<GLint>(obj);
     glUniform1iv(location,1,value);
     NanReturnUndefined();
 }
@@ -1237,7 +1335,8 @@ NAN_METHOD(uniform2iv){
     CHECK_ARGS_LEN(2);
     GLuint location = args[0]->Uint32Value();
     Local<Object> obj = args[2]->ToObject();
-    const GLint *value = getUniformIntArrayData(obj, 2);
+//    const GLint *value = getUniformIntArrayData(obj, 2);
+    const GLint *value = getArrayData<GLint>(obj);
     glUniform2iv(location,1,value);
     NanReturnUndefined();
 }
@@ -1247,7 +1346,8 @@ NAN_METHOD(uniform3iv){
     CHECK_ARGS_LEN(2);
     GLuint location = args[0]->Uint32Value();
     Local<Object> obj = args[2]->ToObject();
-    const GLint *value = getUniformIntArrayData(obj, 3);
+//    const GLint *value = getUniformIntArrayData(obj, 3);
+    const GLint *value = getArrayData<GLint>(obj);
     glUniform3iv(location,1,value);
     NanReturnUndefined();
 }
@@ -1257,7 +1357,8 @@ NAN_METHOD(uniform4iv){
     CHECK_ARGS_LEN(2);
     GLuint location = args[0]->Uint32Value();
     Local<Object> obj = args[2]->ToObject();
-    const GLint *value = getUniformIntArrayData(obj, 4);
+//    const GLint *value = getUniformIntArrayData(obj, 4);
+    const GLint *value = getArrayData<GLint>(obj);
     glUniform4iv(location,1,value);
     NanReturnUndefined();
 }
@@ -1270,8 +1371,8 @@ NAN_METHOD(uniformMatrix2fv) {
     GLboolean transpose = static_cast<GLboolean>(args[1]->BooleanValue());
 
     Local<Object> obj = args[2]->ToObject();
-    const GLfloat *value = getUniformFloat32ArrayData(obj, 4);
-
+//    const GLfloat *value = getUniformFloat32ArrayData(obj, 4);
+    const GLfloat *value = getArrayData<GLfloat>(obj);
     glUniformMatrix2fv(location,1,transpose,value);
     NanReturnUndefined();
 }
@@ -1283,8 +1384,8 @@ NAN_METHOD(uniformMatrix3fv) {
     GLboolean transpose = static_cast<GLboolean>(args[1]->BooleanValue());
 
     Local<Object> obj = args[2]->ToObject();
-    const GLfloat *value = getUniformFloat32ArrayData(obj, 9);
-
+//    const GLfloat *value = getUniformFloat32ArrayData(obj, 9);
+    const GLfloat *value = getArrayData<GLfloat>(obj);
     glUniformMatrix3fv(location,1,transpose,value);
     NanReturnUndefined();
 }
@@ -1295,9 +1396,7 @@ NAN_METHOD(uniformMatrix4fv) {
 
     GLint     location  = args[0]->Int32Value();
     GLboolean transpose = static_cast<GLboolean>(args[1]->BooleanValue());
-
-    Local<Object> obj = args[2]->ToObject();
-    const GLfloat *value = getUniformFloat32ArrayData(obj, 16);
+    const GLfloat *value = getArrayData<GLfloat>(args[2]->ToObject());
 
     glUniformMatrix4fv(location,1,transpose,value);
     NanReturnUndefined();
@@ -1385,7 +1484,7 @@ NAN_METHOD(getFragDataLocation){
     GLuint program = args[0]->Uint32Value();
     String::Utf8Value name(args[1]);
     GLint location = glGetFragDataLocation(program,*name);
-    NanReturnValue(V8_INT(location));
+    NanReturnValue(NanNew(location));
 }
 
 NAN_METHOD(getFrageDataIndex){
@@ -1394,7 +1493,7 @@ NAN_METHOD(getFrageDataIndex){
     GLuint program = args[0]->Uint32Value();
     String::Utf8Value name(args[1]);
     GLint index = glGetFragDataIndex(program,*name);
-    NanReturnValue(V8_INT(index));
+    NanReturnValue(NanNew(index));
 }
 //endregion
 
@@ -1405,7 +1504,7 @@ NAN_METHOD(getFrageDataIndex){
 //region SHADER QUERIES
 NAN_METHOD(isShader) {
     NanScope();
-    NanReturnValue(V8_BOOL(glIsShader(args[0]->Uint32Value())));
+    NanReturnValue(NanNew(glIsShader(args[0]->Uint32Value())));
 }
 
 NAN_METHOD(getShaderParameter) {
@@ -1420,7 +1519,7 @@ NAN_METHOD(getShaderParameter) {
         case GL_COMPILE_STATUS:
         case GL_DELETE_STATUS:
             glGetShaderiv(shader, paramName, &value);
-            NanReturnValue(V8_BOOL(static_cast<bool>(value)));
+            NanReturnValue(NanNew(static_cast<bool>(value)));
         default:
             break;
     }
@@ -1433,7 +1532,7 @@ NAN_METHOD(getShaderInfoLog) {
     GLsizei len = 1024;
     GLchar infoLog[len];
     glGetShaderInfoLog(args[0]->Uint32Value(), len, &len, infoLog);
-    NanReturnValue(V8_STR(infoLog));
+    NanReturnValue(NanNew(infoLog));
 }
 
 NAN_METHOD(getShaderSource) {
@@ -1444,7 +1543,7 @@ NAN_METHOD(getShaderSource) {
     glGetShaderiv(shader, GL_SHADER_SOURCE_LENGTH, &len);
     GLchar *src = new GLchar[len];
     glGetShaderSource(shader, len, NULL, src);
-    Local<String> str = V8_STR(src);
+    Local<String> str = NanNew(src);
     delete src;
     NanReturnValue(str);
 }
@@ -1466,7 +1565,7 @@ NAN_METHOD(isProgram) {
     NanScope();
     CHECK_ARGS_LEN(1);
     GLboolean value = glIsProgram(args[0]->Uint32Value());
-    NanReturnValue(V8_BOOL(value));
+    NanReturnValue(NanNew(value));
 }
 
 //getProgramiv
@@ -1475,7 +1574,7 @@ NAN_METHOD(isProgramPipeline){
     NanScope();
     CHECK_ARGS_LEN(1);
     GLboolean value = glIsProgramPipeline(args[0]->Uint32Value());
-    NanReturnValue(V8_BOOL(value));
+    NanReturnValue(NanNew(value));
 }
 
 //GetProgramPipelineiv
@@ -1487,7 +1586,7 @@ NAN_METHOD(getProgramInfoLog) {
     GLsizei len = 1024;
     GLchar infoLog[len];
     glGetProgramInfoLog(program, len, &len, infoLog);
-    NanReturnValue(V8_STR(infoLog));
+    NanReturnValue(NanNew(infoLog));
 }
 
 NAN_METHOD(getProgramPipelineInfoLog){
@@ -1497,7 +1596,7 @@ NAN_METHOD(getProgramPipelineInfoLog){
     GLsizei len = 1024;
     GLchar infoLog[len];
     glGetProgramPipelineInfoLog(pipeline,len,&len,infoLog);
-    NanReturnValue(V8_STR(infoLog));
+    NanReturnValue(NanNew(infoLog));
 }
 
 NAN_METHOD(getProgramParameter) {
@@ -1510,11 +1609,11 @@ NAN_METHOD(getProgramParameter) {
         case GL_COMPILE_STATUS:
         case GL_LINK_STATUS:
             glGetProgramiv(program,pname,&params);
-            NanReturnValue(V8_BOOL(static_cast<bool>(params)));
+            NanReturnValue(NanNew(static_cast<bool>(params)));
         case GL_ACTIVE_UNIFORMS:
         case GL_ACTIVE_ATTRIBUTES:
             glGetProgramiv(program,pname,&params);
-            NanReturnValue(V8_NUM(params));
+            NanReturnValue(NanNew(params));
         default:
             break;
     }
@@ -1537,9 +1636,9 @@ NAN_METHOD(getMultisamplefv){
     GLuint index = args[1]->Uint32Value();
     GLfloat val[2] = {0.0f, 0.0f};
     glGetMultisamplefv(pname,index,val);
-    Local<Array> out = Array::New(2);
-    out->Set(0,V8_NUM(val[0]));
-    out->Set(1,V8_NUM(val[1]));
+    Local<Array> out = NanNew<Array>(2);
+    out->Set(0,NanNew(val[0]));
+    out->Set(1,NanNew(val[1]));
     NanReturnValue(out);
 }
 
@@ -1907,7 +2006,7 @@ NAN_METHOD(createTexture){
     NanScope();
     GLuint texture = 0;
     glGenTextures(1,&texture);
-    NanReturnValue(V8_INT(texture));
+    NanReturnValue(NanNew(texture));
 }
 
 NAN_METHOD(genTextures){
@@ -1916,9 +2015,9 @@ NAN_METHOD(genTextures){
     GLuint num = args[0]->Uint32Value();
     GLuint textures[num];
     glGenTextures(num,textures);
-    Local<Array> out = Array::New(num);
+    Local<Array> out = NanNew<Array>(num);
     for(uint32_t i = 0; i < num; ++i){
-        out->Set(i,V8_INT(textures[i]));
+        out->Set(i,NanNew(textures[i]));
     }
     NanReturnValue(out);
 }
@@ -1940,7 +2039,7 @@ NAN_METHOD(createSampler){
     NanScope();
     GLuint sampler = 0;
     glGenSamplers(1,&sampler);
-    NanReturnValue(V8_INT(sampler));
+    NanReturnValue(NanNew(sampler));
 }
 
 NAN_METHOD(bindSampler){
@@ -2138,7 +2237,8 @@ NAN_METHOD(texParameterfv){
     CHECK_ARGS_LEN(3);
     GLenum target = args[0]->Uint32Value();
     GLenum pname = args[1]->Uint32Value();
-    const GLfloat *params = reinterpret_cast<const GLfloat*>(getArrayData(args[2]->ToObject()));
+    //const GLfloat *params = reinterpret_cast<const GLfloat*>(getArrayData(args[2]->ToObject()));
+    const GLfloat *params = getArrayData<GLfloat>(args[2]->ToObject());
     glTexParameterfv(target,pname,params);
     NanReturnUndefined();
 }
@@ -2148,7 +2248,8 @@ NAN_METHOD(texParameteriv){
     CHECK_ARGS_LEN(3);
     GLenum target = args[0]->Uint32Value();
     GLenum pname = args[1]->Uint32Value();
-    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+//    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+    const GLint *params = getArrayData<GLint>(args[2]->ToObject());
     glTexParameteriv(target,pname,params);
     NanReturnUndefined();
 }
@@ -2158,7 +2259,8 @@ NAN_METHOD(texParameterIiv){
     CHECK_ARGS_LEN(3);
     GLenum target = args[0]->Uint32Value();
     GLenum pname = args[1]->Uint32Value();
-    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+//    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+    const GLint *params = getArrayData<GLint>(args[2]->ToObject());
     glTexParameterIiv(target,pname,params);
     NanReturnUndefined();
 }
@@ -2168,7 +2270,8 @@ NAN_METHOD(texParameterIuiv){
     CHECK_ARGS_LEN(3);
     GLenum target = args[0]->Uint32Value();
     GLenum pname = args[1]->Uint32Value();
-    const GLuint *params = reinterpret_cast<const GLuint *>(getArrayData(args[2]->ToObject()));
+//    const GLuint *params = reinterpret_cast<const GLuint *>(getArrayData(args[2]->ToObject()));
+    const GLuint *params = getArrayData<GLuint>(args[2]->ToObject());
     glTexParameterIuiv(target,pname,params);
     NanReturnUndefined();
 }
@@ -2210,7 +2313,8 @@ NAN_METHOD(texEnviv){
     CHECK_ARGS_LEN(3);
     GLenum target = args[0]->Uint32Value();
     GLenum pname = args[1]->Uint32Value();
-    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+//    const GLint *params = reinterpret_cast<const GLint *>(getArrayData(args[2]->ToObject()));
+    const GLint *params = getArrayData<GLint>(args[2]->ToObject());
     glTexEnviv(target,pname,params);
     NanReturnUndefined();
 }
@@ -2220,7 +2324,8 @@ NAN_METHOD(texEnvfv){
     CHECK_ARGS_LEN(3);
     GLenum target = args[0]->Uint32Value();
     GLenum pname = args[1]->Uint32Value();
-    const GLfloat *params = reinterpret_cast<const GLfloat *>(getArrayData(args[2]->ToObject()));
+//    const GLfloat *params = reinterpret_cast<const GLfloat *>(getArrayData(args[2]->ToObject()));
+    const GLfloat *params = getArrayData<GLfloat>(args[2]->ToObject());
     glTexEnvfv(target,pname,params);
     NanReturnUndefined();
 }
@@ -2519,8 +2624,7 @@ NAN_METHOD(createBuffer){
     NanScope();
     GLuint buffer;
     glGenBuffers(1, &buffer);
-    buffers.push_back(buffer);
-    NanReturnValue(V8_INT(buffer));
+    NanReturnValue(NanNew(buffer));
 }
 
 NAN_METHOD(genBuffers){
@@ -2529,9 +2633,9 @@ NAN_METHOD(genBuffers){
     GLuint num = args[0]->Uint32Value();
     GLuint buffers[num];
     glGenBuffers(num,buffers);
-    Local<Array> out = Array::New(num);
+    Local<Array> out = NanNew<Array>(num);
     for(uint32_t i = 0; i < num; ++i){
-        out->Set(i,V8_INT(buffers[i]));
+        out->Set(i,NanNew(buffers[i]));
     }
     NanReturnValue(out);
 }
@@ -2626,11 +2730,11 @@ NAN_METHOD(mapBuffer){
     GLenum type   = args[2]->Uint32Value();
     int numberOfElements = args[3]->Int32Value();
 
-    Local<Object> global = Context::GetCurrent()->Global();
-    Local<Value> val     = global->Get(String::New("Float32Array"));
-    Local<Function> f32c = Local<Function>::New(val.As<Function>());
+    Local<Object> global = NanGetCurrentContext()->Global();
+    Local<Value> val     = global->Get(NanNew("Float32Array"));
+    Local<Function> f32c = val.As<Function>();
 
-    Local<Value> size = V8_INT(numberOfElements);
+    Local<Value> size = NanNew(numberOfElements);
     Local<Object> array = f32c->NewInstance(1,&size);
 
     void *data = glMapBuffer(target,access);
@@ -2674,11 +2778,11 @@ NAN_METHOD(mapBufferRange){
     GLbitfield access = args[3]->Uint32Value();
     GLenum type       = args[4]->Uint32Value();
 
-    Local<Object> global = Context::GetCurrent()->Global();
-    Local<Value> val     = global->Get(String::New("Float32Array"));
-    Local<Function> f32c = Local<Function>::New(val.As<Function>());
+    Local<Object> global = NanGetCurrentContext()->Global();
+    Local<Value> val     = global->Get(NanNew("Float32Array"));
+    Local<Function> f32c = val.As<Function>();
 
-    Local<Value> size = V8_INT(length);
+    Local<Value> size = NanNew(length);
     Local<Object> array = f32c->NewInstance(1,&size);
 
     void *data = glMapBufferRange(target,offset,length,access);
@@ -2718,7 +2822,7 @@ NAN_METHOD(unmapBuffer){
     CHECK_ARGS_LEN(1);
     GLenum target = args[0]->Uint32Value();
     GLboolean success = glUnmapBuffer(target);
-    NanReturnValue(V8_BOOL(success));
+    NanReturnValue(NanNew(success));
 }
 
 NAN_METHOD(deleteBuffer) {
@@ -2726,7 +2830,6 @@ NAN_METHOD(deleteBuffer) {
     CHECK_ARGS_LEN(1);
     GLuint buffer = args[0]->Uint32Value();
     glDeleteBuffers(1, &buffer);
-    removeRef(&buffers, buffer);
     NanReturnUndefined();
 }
 
@@ -2741,7 +2844,7 @@ NAN_METHOD(getBufferParameter) {
         case GL_BUFFER_USAGE:
             GLint params;
             glGetBufferParameteriv(target,pname,&params);
-            NanReturnValue(V8_INT(params));
+            NanReturnValue(NanNew(params));
         default:
             break;
     }
@@ -2751,7 +2854,7 @@ NAN_METHOD(getBufferParameter) {
 NAN_METHOD(isBuffer) {
     NanScope();
     CHECK_ARGS_LEN(1);
-    NanReturnValue(V8_BOOL(glIsBuffer(args[0]->Uint32Value())));
+    NanReturnValue(NanNew(glIsBuffer(args[0]->Uint32Value())));
 }
 
 NAN_METHOD(copyBufferSubData){
@@ -2774,7 +2877,7 @@ NAN_METHOD(createVertexArray){
     NanScope();
     GLuint vao;
     glGenVertexArrays(1,&vao);
-    NanReturnValue(V8_INT(vao));
+    NanReturnValue(NanNew(vao));
 }
 
 NAN_METHOD(genVertexArrays){
@@ -2783,9 +2886,9 @@ NAN_METHOD(genVertexArrays){
     GLuint num = args[0]->Uint32Value();
     GLuint arrays[num];
     glGenVertexArrays(num,arrays);
-    Local<Array> out = Array::New(num);
+    Local<Array> out = NanNew<Array>(num);
     for(uint32_t i = 0; i < num; ++i){
-        out->Set(i,V8_INT(arrays[i]));
+        out->Set(i,NanNew(arrays[i]));
     }
     NanReturnValue(out);
 }
@@ -2810,7 +2913,7 @@ NAN_METHOD(isVertexArray){
     NanScope();
     CHECK_ARGS_LEN(1);
     GLboolean value = glIsVertexArray(args[0]->Uint32Value());
-    NanReturnValue(V8_BOOL(value));
+    NanReturnValue(NanNew(value));
 }
 
 /*--------------------------------------------------------------------------------------------*/
@@ -2837,9 +2940,9 @@ NAN_METHOD(readImageData){
 
     FREE_IMAGE_TYPE type = FreeImage_GetImageType(img);
 
-    Local<Object> global  = Context::GetCurrent()->Global();
-    Local<Value> val      = global->Get(String::New("Uint8ClampedArray"));
-    Local<Function> arr_c = Local<Function>::New(val.As<Function>());
+    Local<Object> global  = NanGetCurrentContext()->Global();
+    Local<Value> val      = global->Get(NanNew("Uint8ClampedArray"));
+    Local<Function> arr_c = val.As<Function>();
 
     int dataSize;
     Local<Value> size;
@@ -2849,7 +2952,7 @@ NAN_METHOD(readImageData){
         case FIT_BITMAP:
             switch (FreeImage_GetBPP(img)){
                 case 8: {
-                    size  = V8_INT(numPixels);
+                    size  = NanNew(numPixels);
                     array = arr_c->NewInstance(1,&size);
                     array->SetIndexedPropertiesToPixelData(bits,numPixels);
                     glformat = GL_LUMINANCE;
@@ -2872,7 +2975,7 @@ NAN_METHOD(readImageData){
                         data[i + 2] = pix[j].rgbtBlue;
                     }
 
-                    size = V8_INT(dataSize);
+                    size = NanNew(dataSize);
                     array = arr_c->NewInstance(1, &size);
                     array->SetIndexedPropertiesToPixelData(data,dataSize);
                     glformat = GL_RGB;
@@ -2892,7 +2995,7 @@ NAN_METHOD(readImageData){
                         data[i + 3] = pix[j].rgbReserved;
                     }
 
-                    size = V8_INT(dataSize);
+                    size = NanNew(dataSize);
                     array = arr_c->NewInstance(1, &size);
                     array->SetIndexedPropertiesToPixelData(data, dataSize);
                     glformat = GL_RGBA;
@@ -2917,11 +3020,11 @@ NAN_METHOD(readImageData){
 
     FreeImage_Unload(img);
 
-    Local<Object> out = Object::New();
-    out->Set(V8_STR("width"),V8_INT(width));
-    out->Set(V8_STR("height"),V8_INT(height));
-    out->Set(V8_STR("glformat"),V8_INT(glformat));
-    out->Set(V8_STR("data"),array);
+    Local<Object> out = NanNew<Object>();
+    out->Set(NanNew("width"),NanNew(width));
+    out->Set(NanNew("height"),NanNew(height));
+    out->Set(NanNew("glformat"),NanNew(glformat));
+    out->Set(NanNew("data"),array);
 
     NanReturnValue(out);
 }

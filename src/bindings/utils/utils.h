@@ -5,18 +5,10 @@
 #include <node.h>
 #include <sstream>
 
-#define V8_STR(...) NanSymbol(__VA_ARGS__)
-#define V8_INT(val) v8::Integer::New(val)
-#define V8_NUM(val) v8::Number::New(val)
-#define V8_BOOL(val) v8::Boolean::New(val)
-#define V8_RETHROW(tc) v8::Local<v8::Value>::New(tc.Exception());
-
 #define EXPORT_SET_CONST(name, constant) \
     exports->Set( \
-        V8_STR(name), \
-        V8_NUM(constant), \
-        static_cast<v8::PropertyAttribute>( \
-        v8::ReadOnly|v8::DontDelete))
+        NanNew(name), \
+        NanNew<Number>(constant))
 
 #define EXPORT_SET_METHOD(method) NODE_SET_METHOD(exports, #method, method)
 

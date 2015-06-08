@@ -35,7 +35,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 
 NAN_METHOD(getTime){
     NanScope();
-    NanReturnValue(V8_NUM(glfwGetTime()));
+    NanReturnValue(NanNew(glfwGetTime()));
 }
 
 NAN_METHOD(pollEvents){
@@ -86,9 +86,9 @@ NAN_METHOD(getCursorPos){
     glfwGetCursorPos(
             reinterpret_cast<GLFWwindow*>(windowPtr),
             &x, &y);
-    Local<Array> out = Array::New(2);
-    out->Set(0, V8_NUM(x));
-    out->Set(1, V8_NUM(y));
+    Local<Array> out = NanNew<Array>(2);
+    out->Set(0, NanNew(x));
+    out->Set(1, NanNew(y));
     NanReturnValue(out);
 }
 
@@ -97,7 +97,7 @@ NAN_METHOD(isKeyDown){
     CHECK_ARGS_LEN(1);
     int key = args[0]->IsString() ? **String::Utf8Value(args[0]->ToString()) : args[0]->Int32Value();
     int state = glfwGetKey(reinterpret_cast<GLFWwindow *>(windowPtr),key);
-    NanReturnValue(V8_BOOL(state == GLFW_PRESS));
+    NanReturnValue(NanNew(state == GLFW_PRESS));
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -106,15 +106,15 @@ NAN_METHOD(isKeyDown){
 
 NAN_METHOD(windowShouldClose){
     NanScope();
-    NanReturnValue(V8_BOOL((bool)glfwWindowShouldClose(reinterpret_cast<GLFWwindow*>(windowPtr))));
+    NanReturnValue(NanNew((bool)glfwWindowShouldClose(reinterpret_cast<GLFWwindow*>(windowPtr))));
 }
 
 NAN_METHOD(getScreenSize){
     NanScope();
     const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    Local<Array> out = Array::New(2);
-    out->Set(0, V8_INT(mode->width));
-    out->Set(1, V8_INT(mode->height));
+    Local<Array> out = NanNew<Array>(2);
+    out->Set(0, NanNew(mode->width));
+    out->Set(1, NanNew(mode->height));
     NanReturnValue(out);
 }
 
@@ -135,9 +135,9 @@ NAN_METHOD(getWindowSize){
             &width,
             &height
     );
-    Local<Array> out = Array::New(2);
-    out->Set(0, V8_NUM(width));
-    out->Set(1, V8_NUM(height));
+    Local<Array> out = NanNew<Array>(2);
+    out->Set(0, NanNew(width));
+    out->Set(1, NanNew(height));
     NanReturnValue(out);
 }
 
@@ -156,9 +156,9 @@ NAN_METHOD(getWindowPos){
     glfwGetWindowPos(
             reinterpret_cast<GLFWwindow*>(windowPtr),
             &x, &y);
-    Local<Array> out = Array::New(2);
-    out->Set(0, V8_NUM(x));
-    out->Set(1, V8_NUM(y));
+    Local<Array> out = NanNew<Array>(2);
+    out->Set(0, NanNew(x));
+    out->Set(1, NanNew(y));
     NanReturnValue(out);
 }
 
@@ -166,10 +166,10 @@ NAN_METHOD(getVersion){
     NanScope();
     int major, minor, rev;
     glfwGetVersion(&major,&minor,&rev);
-    Local<Array> out = Array::New(3);
-    out->Set(0, V8_INT(major));
-    out->Set(1, V8_INT(major));
-    out->Set(2, V8_INT(major));
+    Local<Array> out = NanNew<Array>(3);
+    out->Set(0, NanNew(major));
+    out->Set(1, NanNew(major));
+    out->Set(2, NanNew(major));
     NanReturnValue(out);
 }
 
@@ -193,9 +193,9 @@ NAN_METHOD(getFrameBufferSize){
             &width,
             &height
     );
-    Local<Array> out = Array::New(2);
-    out->Set(0, V8_NUM(width));
-    out->Set(1, V8_NUM(height));
+    Local<Array> out = NanNew<Array>(2);
+    out->Set(0, NanNew(width));
+    out->Set(1, NanNew(height));
     NanReturnValue(out);
 }
 
@@ -210,7 +210,7 @@ NAN_METHOD(getDPI){
 
     float dpi = (float)frameBufferWidth / (float)windowWidth;
 
-    NanReturnValue(V8_NUM(dpi));
+    NanReturnValue(NanNew(dpi));
 }
 
 /*--------------------------------------------------------------------------------------------*/
@@ -268,7 +268,7 @@ NAN_METHOD(createWindow){
     initialized = true;
     windowPtr   = (uint64_t) window;
 
-    NanReturnValue(V8_NUM(windowPtr));
+    NanReturnValue(NanNew((uint32_t) windowPtr));
 }
 
 /*--------------------------------------------------------------------------------------------*/
