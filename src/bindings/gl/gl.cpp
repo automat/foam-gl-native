@@ -31,29 +31,6 @@ map<v8::ExternalArrayType, GLuint> ELEMENT_SIZES_FOR_ARRAY_TYPES{
         {v8::kExternalFloatArray, 4}
 };
 
-//const GLfloat* getUniformFloat32ArrayData(Local<Object> value, int lengthExp){
-//    cout << value->GetIndexedPropertiesExternalArrayDataType() << endl;
-//    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
-//        NanThrowTypeError("Array arg not of type Float32Array.");
-//    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
-//        stringstream ss;
-//        ss << "Float32Array length must be " << lengthExp << ".";
-//        NanThrowError(ss.str().c_str());
-//    }
-//    return static_cast<const GLfloat*>(value->GetIndexedPropertiesExternalArrayData());
-//}
-//
-//const GLint* getUniformIntArrayData(Local<Object> value, int lengthExp){
-//    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalIntArray){
-//        NanThrowTypeError("Array arg not of type IntArray.");
-//    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
-//        stringstream ss;
-//        ss << "IntArray length must be " << lengthExp << ".";
-//        NanThrowError(ss.str().c_str());
-//    }
-//    return static_cast<const GLint*>(value->GetIndexedPropertiesExternalArrayData());
-//}
-
 NAN_WEAK_CALLBACK(ExternalCallback) {
     data.GetValue()->Neuter();
     delete[] static_cast<char*>(data.GetParameter());
@@ -163,50 +140,6 @@ void *getImageData(Local<Object> value){
         NanThrowTypeError("Wrong texture data");
     }
     return value->GetIndexedPropertiesExternalArrayData();
-}
-
-//template<typename T,v8::ExternalArrayType C,string S>
-//const T* getUniformArrayData(Local<Object> value, int lengthExp){
-//    if(value->GetIndexedPropertiesExternalArrayDataType() != C){
-//        stringstream ss;
-//        ss << "Array arg not of " << S << ".";
-//        NanThrowTypeError(ss.str().c_str());
-//    } else if(value->GetIndexedPropertiesExternalArrayDataLength() != lengthExp){
-//        stringstream ss;
-//        ss << S << " length must be " << lengthExp << ".";
-//        NanThrowError(ss.str().c_str());
-//    }
-//    return static_cast<const T*>(value->GetIndexedPropertiesExternalArrayData());
-//}
-
-//const void* getArrayData(Local<Object> value){
-//    if(value->IsNull()){
-//        NanThrowError("Array data is null.");
-//    }
-//    ExternalArrayType type = value->GetIndexedPropertiesExternalArrayDataType();
-//    if(type != kExternalByteArray || type != kExternalUnsignedByteArray ||
-//       type != kExternalShortArray || type != kExternalUnsignedShortArray ||
-//       type != kExternalIntArray || type != kExternalUnsignedIntArray ||
-//       type != kExternalFloatArray){
-//        NanThrowTypeError("Array type not supported.");
-//    }
-//    return value->GetIndexedPropertiesExternalArrayData();
-//}
-
-const GLfloat* getFloat32ArrayData(Local<Object> value, int expLen = -1){
-    if(value->IsNull()){
-        NanThrowError("Array data is null.");
-    }
-    if(value->GetIndexedPropertiesExternalArrayDataType() != kExternalFloatArray){
-        NanThrowTypeError("Object is not of type Float32Array.");
-    }
-    int len = value->GetIndexedPropertiesExternalArrayDataLength();
-    if(expLen > 0 && expLen != len){
-        stringstream ss;
-        ss << "Float32Array length should be " << expLen << " not " << len << ".";
-        NanThrowRangeError(ss.str().c_str());
-    }
-    return reinterpret_cast<const GLfloat *>(value->GetIndexedPropertiesExternalArrayData());
 }
 
 /*--------------------------------------------------------------------------------------------*/
@@ -531,7 +464,7 @@ NAN_METHOD(vertex4f){
 NAN_METHOD(vertex2fv){
     NanScope();
     CHECK_ARGS_LEN(1);
-    const GLfloat *coords = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *coords = getArrayData<GLfloat>(args[0]->ToObject());
     glVertex2fv(coords);
     NanReturnUndefined();
 }
@@ -539,7 +472,7 @@ NAN_METHOD(vertex2fv){
 NAN_METHOD(vertex3fv){
     NanScope();
     CHECK_ARGS_LEN(1);
-    const GLfloat *coords = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *coords = getArrayData<GLfloat>(args[0]->ToObject());
     glVertex3fv(coords);
     NanReturnUndefined();
 }
@@ -547,7 +480,7 @@ NAN_METHOD(vertex3fv){
 NAN_METHOD(vertex4fv){
     NanScope();
     CHECK_ARGS_LEN(1);
-    const GLfloat *coords = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *coords = getArrayData<GLfloat>(args[0]->ToObject());
     glVertex4fv(coords);
     NanReturnUndefined();
 }
@@ -642,7 +575,7 @@ NAN_METHOD(multiTexCoord1fv){
     NanScope();
     CHECK_ARGS_LEN(2);
     GLenum texture = args[0]->Uint32Value();
-    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *v = getArrayData<GLfloat>(args[0]->ToObject());
     glMultiTexCoord1fv(texture,v);
     NanReturnUndefined();
 }
@@ -651,7 +584,7 @@ NAN_METHOD(multiTexCoord2fv){
     NanScope();
     CHECK_ARGS_LEN(2);
     GLenum texture = args[0]->Uint32Value();
-    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *v = getArrayData<GLfloat>(args[0]->ToObject());
     glMultiTexCoord2fv(texture,v);
     NanReturnUndefined();
 }
@@ -660,7 +593,7 @@ NAN_METHOD(multiTexCoord3fv){
     NanScope();
     CHECK_ARGS_LEN(2);
     GLenum texture = args[0]->Uint32Value();
-    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *v = getArrayData<GLfloat>(args[0]->ToObject());
     glMultiTexCoord3fv(texture,v);
     NanReturnUndefined();
 }
@@ -669,7 +602,7 @@ NAN_METHOD(multiTexCoord4fv){
     NanScope();
     CHECK_ARGS_LEN(2);
     GLenum texture = args[0]->Uint32Value();
-    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *v = getArrayData<GLfloat>(args[0]->ToObject());
     glMultiTexCoord4fv(texture,v);
     NanReturnUndefined();
 }
@@ -690,7 +623,7 @@ NAN_METHOD(normal3f){
 NAN_METHOD(normal3fv){
     NanScope();
     CHECK_ARGS_LEN(1);
-    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *v = getArrayData<GLfloat>(args[0]->ToObject());
     glNormal3fv(v);
     NanReturnUndefined();
 }
@@ -709,7 +642,7 @@ NAN_METHOD(fogCoordf){
 NAN_METHOD(fogCoordfv){
     NanScope();
     CHECK_ARGS_LEN(2);
-    const GLfloat *coord = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *coord = getArrayData<GLfloat>(args[0]->ToObject());
     glFogCoordfv(coord);
     NanReturnUndefined();
 }
@@ -759,7 +692,7 @@ NAN_METHOD(color4f){
 NAN_METHOD(color3fv){
     NanScope();
     CHECK_ARGS_LEN(1);
-    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *v = getArrayData<GLfloat>(args[0]->ToObject());
     glColor3fv(v);
     NanReturnUndefined();
 }
@@ -767,7 +700,7 @@ NAN_METHOD(color3fv){
 NAN_METHOD(color4fv){
     NanScope();
     CHECK_ARGS_LEN(1);
-    const GLfloat *v = getFloat32ArrayData(args[0]->ToObject());
+    const GLfloat *v = getArrayData<GLfloat>(args[0]->ToObject());
     glColor4fv(v);
     NanReturnUndefined();
 }
