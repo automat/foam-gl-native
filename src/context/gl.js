@@ -113,6 +113,10 @@ gl.uniform1i = function(location,x){};
 gl.uniform2i = function(location,x,y){};
 gl.uniform3i = function(location,x,y,z){};
 gl.uniform4i = function(location,x,y,z,w){};
+gl.uniform1ui = function(location,x){};
+gl.uniform2ui = function(location,x,y){};
+gl.uniform3ui = function(location,x,y,z){};
+gl.uniform4ui = function(location,x,y,z,w){};
 gl.uniform1fv = function(location,x){};
 gl.uniform2fv = function(location,x){};
 gl.uniform3fv = function(location,x){};
@@ -205,6 +209,7 @@ gl.cullFace = function(mode){};
 //endregion
 
 //region POLYGON RASTERIZATION & DEPTH OFFSET
+gl.polygonMode = function(face,mode){};
 gl.polygonOffset = function(factor,units){};
 //endregion
 

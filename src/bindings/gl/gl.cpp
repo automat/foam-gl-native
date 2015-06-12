@@ -426,7 +426,6 @@ NAN_METHOD(drawElements){
     GLsizei count  = args[1]->Uint32Value();
     GLenum  type   = args[2]->Uint32Value();
     GLvoid *offset = reinterpret_cast<GLvoid*>(args[3]->Uint32Value());
-
     glDrawElements(mode,count,type,offset);
     NanReturnUndefined();
 }
@@ -439,7 +438,6 @@ NAN_METHOD(drawElementsInstanced){
     GLenum  type      = args[2]->Uint32Value();
     GLvoid *indices   = reinterpret_cast<GLvoid *>(args[3]->Uint32Value());
     GLsizei primcount = args[4]->Uint32Value();
-
     glDrawElementsInstanced(mode,count,type,indices,primcount);
     NanReturnUndefined();
 }
@@ -455,7 +453,6 @@ NAN_METHOD(drawRangeElements){
     GLsizei count  = args[3]->Uint32Value();
     GLenum  type   = args[4]->Uint32Value();
     GLvoid *offset = reinterpret_cast<GLvoid*>(args[5]->Uint32Value());
-
     glDrawRangeElements(mode,start,end,count,type,offset);
     NanReturnUndefined();
 }
@@ -1279,6 +1276,48 @@ NAN_METHOD(uniform4i) {
     NanReturnUndefined();
 }
 
+NAN_METHOD(uniform1ui) {
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLint location = args[0]->Uint32Value();
+    GLuint x = args[1]->Uint32Value();
+    glUniform1ui(location,x);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform2ui) {
+    NanScope();
+    CHECK_ARGS_LEN(3);
+    GLint location = args[0]->Uint32Value();
+    GLuint x = args[1]->Uint32Value();
+    GLuint y = args[2]->Uint32Value();
+    glUniform2ui(location,x,y);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform3ui) {
+    NanScope();
+    CHECK_ARGS_LEN(4);
+    GLint location = args[0]->Uint32Value();
+    GLuint x = args[1]->Uint32Value();
+    GLuint y = args[2]->Uint32Value();
+    GLuint z = args[3]->Uint32Value();
+    glUniform3ui(location,x,y,z);
+    NanReturnUndefined();
+}
+
+NAN_METHOD(uniform4ui) {
+    NanScope();
+    CHECK_ARGS_LEN(5);
+    GLint location = args[0]->Uint32Value();
+    GLuint x = args[1]->Uint32Value();
+    GLuint y = args[2]->Uint32Value();
+    GLuint z = args[3]->Uint32Value();
+    GLuint w = args[4]->Uint32Value();
+    glUniform4ui(location,x,y,z,w);
+    NanReturnUndefined();
+}
+
 NAN_METHOD(uniform1fv){
     NanScope();
     CHECK_ARGS_LEN(2);
@@ -1706,7 +1745,15 @@ NAN_METHOD(cullFace){
 //endregion
 
 //region POLYGON RASTERIZATION & DEPTH OFFSET
-//polygonMode
+NAN_METHOD(polygonMode){
+    NanScope();
+    CHECK_ARGS_LEN(2);
+    GLenum face = args[0]->Uint32Value();
+    GLenum mode = args[1]->Uint32Value();
+    glPolygonMode(face,mode);
+    NanReturnUndefined();
+}
+
 NAN_METHOD(polygonOffset){
     NanScope();
     CHECK_ARGS_LEN(2);
@@ -2885,7 +2932,7 @@ NAN_METHOD(readImageData){
                         data[i + 2] = pix[j].rgbBlue;
                         data[i + 3] = pix[j].rgbReserved;
                     }
-                    
+
                     array = createTypedArray<Uint8ClampedArray>(data,dataSize);
                     glformat = GL_RGBA;
 
@@ -3088,6 +3135,10 @@ void gl::init(Handle<Object> exports) {
     EXPORT_SET_METHOD(uniform2i);
     EXPORT_SET_METHOD(uniform3i);
     EXPORT_SET_METHOD(uniform4i);
+    EXPORT_SET_METHOD(uniform1ui);
+    EXPORT_SET_METHOD(uniform2ui);
+    EXPORT_SET_METHOD(uniform3ui);
+    EXPORT_SET_METHOD(uniform4ui);
     EXPORT_SET_METHOD(uniform1fv);
     EXPORT_SET_METHOD(uniform2fv);
     EXPORT_SET_METHOD(uniform3fv);
@@ -3195,7 +3246,7 @@ void gl::init(Handle<Object> exports) {
     //endregion
 
     //region POLYGON RASTERIZATION & DEPTH OFFSET
-    //polygonMode
+    EXPORT_SET_METHOD(polygonMode);
     EXPORT_SET_METHOD(polygonOffset);
     //endregion
 
