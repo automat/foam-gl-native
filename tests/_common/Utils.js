@@ -1,22 +1,16 @@
 function compileShader(gl,type,strShader){
-    types = {};
+    var types = {};
     types[gl.VERTEX_SHADER] = 'VERTEX_SHADER';
     types[gl.FRAGMENT_SHADER] = 'FRAGMENT_SHADER';
     types[gl.GEOMETRY_SHADER] = 'GEOMETRY_SHADER';
     types[gl.TESS_CONTROL_SHADER] = 'TESS_CONTROL_SHADER';
     types[gl.TESS_EVALUATION_SHADER] = 'TESS_EVALUATION_SHADER';
     types[gl.COMPUTE_SHADER] = 'COMPUTE_SHADER';
-    //var types = {
-    //    gl.VERTEX_SHADER          : 'VERTEX_SHADER',
-    //    gl.FRAGMENT_SHADER        : 'FRAGMENT_SHADER',
-    //    gl.GEOMETRY_SHADER        : 'GEOMETRY_SHADER',
-    //    gl.TESS_CONTROL_SHADER    : 'TESS_CONTROL_SHADER',
-    //    gl.TESS_EVALUATION_SHADER : 'TESS_EVALUATION_SHADER',
-    //    gl.COMPUTE_SHADER         : 'COMPUTE_SHADER'
-    //}
+
     if(!types[type]){
         throw new Error('Wrong shader type: ' + type + '.');
     }
+
     var out = gl.createShader(type);
     gl.shaderSource(out,strShader);
     gl.compileShader(out);
@@ -24,7 +18,26 @@ function compileShader(gl,type,strShader){
         throw new Error(types[type] + ' ' + gl.getShaderInfoLog(out));
     }
     gl.compileShader(out);
+
     return out;
+}
+
+function checkProgramLinkStatus(gl,program){
+    if(!gl.getProgramParameter(program,gl.LINK_STATUS)){
+        throw new Error('PROGRAM ' + gl.getProgramInfoLog(program));
+    }
+}
+
+function bindAttribLocations(gl,program,locationsToBind){
+    for(var location in locationsToBind){
+        gl.bindAttribLocation(program, location, locationsToBind[location]);
+    }
+}
+
+function bindFragDataLocations(gl,program,locationsToBind){
+    for(var location in locationsToBind){
+        gl.bindFragDataLocation(program, location, locationsToBind[location]);
+    }
 }
 
 function createProgram(gl,strVertShader,strFragShader,attribLocationsToBind,fragDataLocationsToBind){
@@ -38,19 +51,11 @@ function createProgram(gl,strVertShader,strFragShader,attribLocationsToBind,frag
     gl.attachShader(out,vertShader);
     gl.attachShader(out,fragShader);
 
-    for(var attribLocation in attribLocationsToBind){
-        gl.bindAttribLocation(out,attribLocation[0],attribLocation[1]);
-    }
-
-    for(var fragDataLocations in fragDataLocationsToBind){
-        gl.bindFragDataLocation(out,fragDataLocations[0],fragDataLocations[1]);
-    }
+    bindAttribLocations(gl,out,attribLocationsToBind);
+    bindFragDataLocations(gl,out,fragDataLocationsToBind);
 
     gl.linkProgram(out);
-
-    if(!gl.getProgramParameter(out,gl.LINK_STATUS)){
-        throw new Error('PROGRAM ' + gl.getProgramInfoLog(out));
-    }
+    checkProgramLinkStatus(gl,out);
 
     return out;
 }
@@ -66,26 +71,39 @@ function createProgramv(gl,shaders,attribLocationsToBind,fragDataLocationsToBind
         gl.attachShader(out,compileShader(gl,shader.type,shader.src));
     }
 
-    for(var attribLocation in attribLocationsToBind){
-        gl.bindAttribLocation(out,attribLocation[0],attribLocation[1]);
-    }
-
-    for(var fragDataLocations in fragDataLocationsToBind){
-        gl.bindFragDataLocation(out,fragDataLocations[0],fragDataLocations[1]);
-    }
+    bindAttribLocations(gl,out,attribLocationsToBind);
+    bindFragDataLocations(gl,out,fragDataLocationsToBind);
 
     gl.linkProgram(out);
-
-    if(!gl.getProgramParameter(out,gl.LINK_STATUS)){
-        throw new Error('PROGRAM ' + gl.getProgramInfoLog(out));
-    }
+    checkProgramLinkStatus(gl,out);
 
     return out;
+}
+
+function getError(gl){
+    var ERROR_STR = {};
+    ERROR_STR[gl.INVALID_OPERATION] = 'INVALID_OPERATION';
+    ERROR_STR[gl.INVALID_ENUM] = 'INVALID_ENUM';
+    ERROR_STR[gl.INVALID_VALUE] = 'INVALID_VALUE';
+    ERROR_STR[gl.OUT_OF_MEMORY] = 'OUT_OF_MEMORY';
+    ERROR_STR[gl.INVALID_FRAMEBUFFER_OPERATION] = 'INVALID_FRAMEBUFFER_OPERATION';
+
+    var error = gl.getError();
+    if(error === gl.NO_ERROR){
+        return;
+    }
+
+    error = ERROR_STR[error] === undefined ? error : ERROR_STR[error];
+    console.log("GL_ERROR",error);
 }
 
 
 module.exports = {
     compileShader : compileShader,
+    bindAttribLocations : bindAttribLocations,
+    bindFragDataLocations : bindFragDataLocations,
+    checkProgramLinkStatus : checkProgramLinkStatus,
     createProgram : createProgram,
-    createProgramv : createProgramv
+    createProgramv : createProgramv,
+    getError : getError
 };
