@@ -39,22 +39,21 @@ function setup(){
     gl.bindBuffer(gl.ARRAY_BUFFER,this._vbo);
 
     var vertexData = new Float32Array([
-        //x,y,z, r,g,b
-         1.0,  1.0, 0.0, 1.0, 0.0, 0.0, // vertex 0
-        -1.0,  1.0, 0.0, 0.0, 1.0, 0.0, // vertex 1
-         1.0, -1.0, 0.0, 0.0, 0.0, 1.0, // vertex 2
-         1.0, -1.0, 0.0, 0.0, 0.0, 1.0, // vertex 3
-        -1.0,  1.0, 0.0, 0.0, 1.0, 0.0, // vertex 4
-        -1.0, -1.0, 0.0, 1.0, 0.0, 0.0  // vertex 5
+         1.0,  1.0, 0.0, 1.0, 0.0, 0.0,
+        -1.0,  1.0, 0.0, 0.0, 1.0, 0.0,
+         1.0, -1.0, 0.0, 0.0, 0.0, 1.0,
+         1.0, -1.0, 0.0, 0.0, 0.0, 1.0,
+        -1.0,  1.0, 0.0, 0.0, 1.0, 0.0,
+        -1.0, -1.0, 0.0, 1.0, 0.0, 0.0
     ]);
 
     gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.STATIC_DRAW);
 
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0,3, gl.FLOAT, false, 6 * 4, 0);
-    gl.enableVertexAttribArray(1);
-    gl.vertexAttribPointer(1,3, gl.FLOAT, false, 6 * 4, 6 * 3);
 
+    gl.enableVertexAttribArray(1);
+    gl.vertexAttribPointer(1,3, gl.FLOAT, false, 6 * 4, 3 * 4);
 
     gl.useProgram(this._program);
     gl.bindVertexArray(this._vao);
@@ -64,6 +63,7 @@ function setup(){
 function update(){
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+    Utils.getError(gl);
 }
 
 Context.new({setup:setup,update:update});

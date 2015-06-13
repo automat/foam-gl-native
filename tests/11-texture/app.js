@@ -1,10 +1,11 @@
 var fs   = require('fs');
 var path = require('path');
 
-var Utils    = require('../_common/Utils');
-var glu      = require('../_common/glu');
-var Vec3     = require('../_common/Vec3');
-var Matrix44 = require('../_common/Matrix44');
+var Utils     = require('../_common/Utils');
+var glu       = require('../_common/glu');
+var Vec3      = require('../_common/Vec3');
+var Matrix44  = require('../_common/Matrix44');
+var Geoemetry = require('../_common/Geometry');
 var Context = require('../../index.js');
 var gl = Context.gl;
 
@@ -45,6 +46,8 @@ var FRAG_SRC =
 
 function setup(){
     this.initWindow(800,600);
+
+    console.log(this.getDPI());
 
     var program = this._program = Utils.createProgramv(gl,[
         {type : gl.VERTEX_SHADER,   src : VERT_SRC},
@@ -120,7 +123,7 @@ function update(){
 
     getGLError();
 
-    if(this._writeTestImage && !this._imageWritten){
+    if(!this._imageWritten){
         var windowSize = this.getWindowSize();
         gl.writeImage(__dirname + '/out.png',0,0,windowSize[0],windowSize[1]);
         this._imageWritten = true;

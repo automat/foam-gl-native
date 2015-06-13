@@ -96,7 +96,7 @@ function setup(){
         velocity[i * 3 + 2] = -0.5 + Math.random();
     }
 
-    var numBuffers = this._numBuffers = 3;
+    var numBuffers = this._numBuffers = 1;
     var vao = this._vao = gl.genVertexArrays(numBuffers);
     var vbo = this._vbo = gl.genBuffers(numBuffers);
 
@@ -205,9 +205,18 @@ function update(){
     var currentBuffer = this._currentBuffer;
 
     gl.bindBuffer(gl.ARRAY_BUFFER,vbo[(currentBuffer + numBuffers - 1)%numBuffers]);
-    var mapped = gl.mapBufferRange(gl.ARRAY_BUFFER,0,vertexData.length,gl.MAP_WRITE_BIT | gl.MAP_INVALIDATE_BUFFER_BIT,gl.FLOAT);
-    mapped.set(vertexData);
-    gl.unmapBuffer(gl.ARRAY_BUFFER);
+    gl.bufferData(gl.ARRAY_BUFFER,vertexData,gl.DYNAMIC_DRAW);
+   // var mapped = gl.mapBufferRange(gl.ARRAY_BUFFER,0,vertexData.length,gl.MAP_INVALIDATE_RANGE_BIT | gl.MAP_WRITE_BIT ,gl.FLOAT);
+   // //console.log('mapped','byteLength',mapped.byteLength,'length',mapped.length);
+   // //console.log('vertexData','byteLength',vertexData.byteLength,'length',vertexData.length);
+   //// mapped.set(vertexData);
+   //
+   // for(var i = 0, l = vertexData.length; i < l; ++i){
+   //     mapped[i] = vertexData[i];
+   //     //console.log(mapped[i], vertexData[i]);
+   // }
+
+    //gl.unmapBuffer(gl.ARRAY_BUFFER);
 
     var projection = new Float32Array(16);
     glu.perspective(
@@ -217,7 +226,7 @@ function update(){
 
     var view = new Float32Array(16);
     glu.lookAt(view,
-        Math.cos(t ) * 40.0,0,Math.sin(t) * 40.0,
+        Math.cos(t ) * 80.0,0,Math.sin(t) * 80.0,
         0,0,0,
         0,1,0
     );

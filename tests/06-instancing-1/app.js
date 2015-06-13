@@ -29,7 +29,8 @@ var FRAG_SRC =
     "}\n";
 
 function setup(){
-    this.initWindow(800,600);
+    var screenSize = this.getScreenSize();
+    this.initWindow(screenSize[0],screenSize[1]);;
 
     this._program = Utils.createProgram(gl,VERT_SRC, FRAG_SRC);
     this._uniformLocationViewProjectionMatrix = gl.getUniformLocation(this._program, 'ViewProjection');
@@ -186,39 +187,7 @@ function update(){
     matrixTemp.set(matrixProjectionView.m);
 
     gl.uniformMatrix4fv(this._uniformLocationViewProjectionMatrix,false,matrixTemp);
-
-
-
-    //gl.drawElements(gl.TRIANGLES, 6 * 6, gl.UNSIGNED_SHORT, 0);
-
     gl.drawElementsInstanced(gl.TRIANGLES, 6 * 6, gl.UNSIGNED_SHORT, 0, this._numElements);
 }
 
 Context.new({setup:setup,update:update});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

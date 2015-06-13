@@ -34,7 +34,7 @@ function setup(){
     success = gl.unmapBuffer(gl.ARRAY_BUFFER);
     console.log(success);
 
-    data = gl.mapBufferRange(gl.ARRAY_BUFFER,0,10,gl.MAP_READ_BIT | gl.MAP_WRITE_BIT,gl.FLOAT);
+    data = gl.mapBufferRange(gl.ARRAY_BUFFER,0,10,gl.MAP_WRITE_BIT,gl.FLOAT);
     data[0] = data[4] = data[8] = 1234.567;
     console.log(data);
     success = gl.unmapBuffer(gl.ARRAY_BUFFER);

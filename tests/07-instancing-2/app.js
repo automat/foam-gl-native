@@ -9,13 +9,16 @@ var gl       = Context.gl;
 
 var VERT_SRC =
     "#version 330\n" +
-    "uniform mat4 ViewProjection;\n"  + // the projection matrix uniform
+    "layout(std140) uniform Matrices {\n" +
+    "   mat4 ViewProjection;\n" +
+    "   mat4 Model[8];\n" +
+    "};\n" +
     "layout(location = 0) in vec4 vposition;\n" +
     "layout(location = 1) in vec4 vcolor;\n" +
     "out vec4 fcolor;\n" +
     "void main() {\n" +
     "   fcolor = vcolor;\n" +
-    "   gl_Position = ViewProjection*vposition;\n" +
+    "   gl_Position = ViewProjection*Model[gl_InstanceID]*vposition;\n" +
     "}\n";
 
 var FRAG_SRC =
@@ -26,11 +29,39 @@ var FRAG_SRC =
     "   FragColor = fcolor;\n" +
     "}\n";
 
+
 function setup(){
     this.initWindow(800,600);
 
     this._program = Utils.createProgram(gl,VERT_SRC, FRAG_SRC);
     this._uniformLocationViewProjectionMatrix = gl.getUniformLocation(this._program, 'ViewProjection');
+
+    this._matricesBinding   = 0;
+    this._uniformBlockIndex = gl.getUniformBlockIndex(this._program,'Matrices');
+    gl.uniformBlockBinding(this._program, this._uniformBlockIndex, this._matricesBinding);
+
+    this._ubo = gl.createBuffer();
+    gl.bindBuffer(gl.UNIFORM_BUFFER, this._ubo);
+    gl.bufferData(gl.UNIFORM_BUFFER, 8 * 4 * 4 * 4, 0, gl.STREAM_DRAW);
+
+
+    function createTranslationMatrixF32(x,y,z){
+        return new Matrix44().translatef(x,y,z).m;
+    }
+
+    var modelMatrices = new Float32Array([
+        createTranslationMatrixF32( 2, 2,-2),
+        createTranslationMatrixF32( 2, 2,-2),
+        createTranslationMatrixF32( 2,-2, 2),
+        createTranslationMatrixF32( 2,-2,-2),
+        createTranslationMatrixF32(-2, 2, 2),
+        createTranslationMatrixF32(-2, 2,-2),
+        createTranslationMatrixF32(-2,-2, 2),
+        createTranslationMatrixF32(-2,-2,-2)
+    ]);
+
+
+    gl.bufferSubData(gl.UNIFORM_BUFFER, 0, modelMatrices);
 
     this._vao = gl.createVertexArray();
     gl.bindVertexArray(this._vao);
@@ -110,6 +141,26 @@ function setup(){
 
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexData, gl.STATIC_DRAW);
 
+    this._tbo = gl.createBuffer(gl.ARRAY_BUFFER);
+    gl.bindBuffer(gl.ARRAY_BUFFER,this._tbo);
+
+    var translationData = new Float32Array([
+        2.0, 2.0, 2.0,  // cube 0
+        2.0, 2.0,-2.0,  // cube 1
+        2.0,-2.0, 2.0,  // cube 2
+        2.0,-2.0,-2.0,  // cube 3
+        -2.0, 2.0, 2.0,  // cube 4
+        -2.0, 2.0,-2.0,  // cube 5
+        -2.0,-2.0, 2.0,  // cube 6
+        -2.0,-2.0,-2.0,  // cube 7
+    ]);
+
+    gl.bufferData(gl.ARRAY_BUFFER, translationData, gl.STATIC_DRAW);
+
+    gl.enableVertexAttribArray(2);
+    gl.vertexAttribPointer(2,3,gl.FLOAT, false, 0, 0);
+    gl.vertexAttribDivisor(2,1);
+
     gl.useProgram(this._program);
     gl.bindVertexArray(this._vao);
     gl.clearColor(0,0,0,1);
@@ -141,11 +192,13 @@ function update(){
     matrixView.multiplied(matrixProjection,matrixProjectionView);
     matrixTemp.set(matrixProjectionView.m);
 
-    //console.log(matrixTemp);
-
     gl.uniformMatrix4fv(this._uniformLocationViewProjectionMatrix,false,matrixTemp);
-    //
-    gl.drawElements(gl.TRIANGLES, 6 * 6, gl.UNSIGNED_SHORT, 0);
+
+
+
+    //gl.drawElements(gl.TRIANGLES, 6 * 6, gl.UNSIGNED_SHORT, 0);
+
+    gl.drawElementsInstanced(gl.TRIANGLES, 6 * 6, gl.UNSIGNED_SHORT, 0, 8);
 }
 
 Context.new({setup:setup,update:update});

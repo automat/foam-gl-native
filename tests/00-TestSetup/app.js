@@ -5,6 +5,7 @@ var gl = ContextGLNative.gl;
 function setup(){
     this.initWindow(800,600,'Test Setup');
 
+    console.log(gl);
     console.log('OpenGL version',this.getVersion());
 
     var vertexSource =
